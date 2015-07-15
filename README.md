@@ -37,12 +37,37 @@ We try to follow the KISS principle by minimizing the exposure of details.
 + `open()` open the NetCDF connection
 + `close()` close the NetCDF connection
 + `flavor()` retrieve the flavor of the NetCDF data (*e.g.* [source='OISST',type='raster'])
-+ `get_raster(bb, t)` retrieve a n-d array as SpatialRaster
-+ `get_path(x, y, t)` retrieve a path SpatialLinesDataFrame
-+ `get_points(x, y, t)` retrieve set of points as SpatialPointsDataFrame 
++ `get_raster(bb, t)` retrieve a n-d array as SpatialRaster within the bounding box for the given times
++ `get_path(bb, t)` retrieve a path SpatialLinesDataFrame within the bounding box for the given times (not sure what this is just yet!)
++ `get_points(bb, t)` retrieve set of points as SpatialPointsDataFrame within the bounding box for the given times
 
 #### Known sources of data
 
-+ `MUR`
-+ `OISST`
-+ `MODISA`
+Establish the basics...
+
+```R
+library(spnc)
+bb <- c(-72,-63,39,46)
+```
+
++ `MURSST` [Multi-scale Ultra-high Resolution Sea Surface Temperature](http://mur.jpl.nasa.gov/)
+
+```R
+MUR_file <- 'http://thredds.jpl.nasa.gov/thredds/dodsC/ncml_aggregation/OceanTemperature/ghrsst/aggregate__ghrsst_JPL-L4UHfnd-GLOB-MUR.ncml'
+MUR <- SPNC(MUR_file, bb = bb)
+```
+
++ `OISST` [NOAA Optimum Interpolation (OI) Sea Surface Temperature ](http://www.esrl.noaa.gov/psd/data/gridded/data.noaa.oisst.v2.html)
+
+```R
+OISST_file = 'http://www.ncdc.noaa.gov/thredds/dodsC/OISST-V2-AVHRR_agg'
+OI <- SPNC(OISST_file, bb = bb)
+```
+
++ `MODISA`  [Modis Aqua](http://oceancolor.gsfc.nasa.gov/cms/)
+
+```R
+MODISA_file <- 'http://oceandata.sci.gsfc.nasa.gov/opendap/MODISA/L3SMI/2008/001/A2008001.L3m_DAY_CHL_chlor_a_4km.nc'
+MO <- SPNC(MODISA_file, bb = bb)
+```
+
