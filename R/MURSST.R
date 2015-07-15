@@ -18,6 +18,7 @@ MURSSTRefClass$methods(
    get_raster = function(what = .self$VARS, layer = 1,
       crs = "+proj=longlat +datum=WGS84", flip = TRUE, time_fmt = time_fmt){
   
+      subnav <- .self$subset_coords(.self$BB, .self$LON, .self$LAT)
       ext <- raster::extent(subnav[['bb']])
       
       getOneVar <- function(vname, NC, subnav, layer = 1,

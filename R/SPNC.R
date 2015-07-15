@@ -137,7 +137,7 @@ SPNCRefClass$methods(
 #'    a possibly updated copy of \code{bb} vector of [left, right, bottom, top]
 NULL
 SPNCRefClass$methods(
-   subset_coords = function(bb = .self$BB, lon = c(-180,180), lat = c(-90,90)){
+   subset_coords = function(bb = .self$BB, lon = .self$LON, lat = .self$LAT){
    
       if (is.null(bb)){
          return( list(start = c(1,1), count = c(length(lon), length(lat)),
@@ -173,7 +173,7 @@ SPNCRefClass$methods(
 #' @return a \code{SpatialPointsDataFrame} or NULL
 NULL
 SPNCRefClass$methods(
-   get_raster = function(what = .self$VARS, 
+   get_points = function(what = .self$VARS, 
       layer = 1, 
       crs = "+proj=longlat +datum=WGS84"){
       cat("SPNCRefClass$get_points: not implemented\n")

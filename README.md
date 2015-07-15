@@ -55,6 +55,18 @@ bb <- c(-72,-63,39,46)
 ```R
 MUR_file <- 'http://thredds.jpl.nasa.gov/thredds/dodsC/ncml_aggregation/OceanTemperature/ghrsst/aggregate__ghrsst_JPL-L4UHfnd-GLOB-MUR.ncml'
 MUR <- SPNC(MUR_file, bb = bb)
+# Reference Class: "MURSSTRefClass" (from the global environment) 
+#   flavor: MURSST:raster 
+#   state: opened 
+#   bounding box: -72 -63 39 46 
+#   VARS: analysed_sst analysis_error mask sea_ice_fraction 
+#   DIMS: lat=16384 lon=32768 time=3963 
+#   LON: [ -179.994995, 179.994995] 
+#   LAT: [ -89.994499, 89.994499] 
+#   TIME: [ 2002-06-01 09:00:00, 2013-04-06 09:00:00] 
+
+r <- MUR$get_raster(what = 'analysed_sst', layer = 1)
+raster::spplot(r)
 ```
 
 + `OISST` [NOAA Optimum Interpolation (OI) Sea Surface Temperature ](http://www.esrl.noaa.gov/psd/data/gridded/data.noaa.oisst.v2.html)
