@@ -164,6 +164,40 @@ SPNCRefClass$methods(
    })
 
 
+
+#' Get point data
+#'
+#' @name SPNCRefClass_get_points
+#' @param what character one or more variable names or variable indices
+#' @param crs character, the coordiante reference system to apply
+#' @return a \code{SpatialPointsDataFrame} or NULL
+NULL
+SPNCRefClass$methods(
+   get_raster = function(what = .self$VARS, 
+      layer = 1, 
+      crs = "+proj=longlat +datum=WGS84"){
+      cat("SPNCRefClass$get_points: not implemented\n")
+      return(NULL)  
+   })
+
+
+#' Get path (line) data
+#'
+#' @name SPNCRefClass_get_path
+#' @param what character one or more variable names or variable indices
+#' @param crs character, the coordiante reference system to apply
+#' @return a \code{SpatialLinesDataFrame} or NULL
+NULL
+SPNCRefClass$methods(
+   get_path = function(x, y, time, what = .self$VARS, 
+      crs = "+proj=longlat +datum=WGS84"){
+      cat("SPNCRefClass$get_points: not implemented\n")
+      return(NULL)  
+   })
+
+
+
+   
 #' Get one or more variables of one or more layers (time) By default just the 
 #' first layer (time) is returned.
 #'
