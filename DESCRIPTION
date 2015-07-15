@@ -1,0 +1,14 @@
+Package: spnc
+Title: A simplified interface between spatial classes and NetCDF data sources.
+Description: Provides a uniform interface for extracting spatial data types from various NetCDF sources.
+Version: 0.1
+Depends:
+    R (>= 3.0),
+    methods
+Imports:
+    sp,
+    ncdf4,
+    raster
+Maintainer: Ben Tupper <btupper@bigelow.org>
+Author: Ben Tupper <btupper@bigelow.org>
+License: GPL (>= 2)
