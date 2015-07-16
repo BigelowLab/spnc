@@ -3,3 +3,8 @@
 export(spnc_flavor)
 export(to180)
 export(to360)
+exportClasses(MODISL3SMIRefClass)
+exportClasses(MURSSTRefClass)
+exportClasses(OISSTRefClass)
+exportClasses(SPNCRefClass)
+import(methods)

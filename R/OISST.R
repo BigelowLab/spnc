@@ -1,5 +1,8 @@
 # OISST
 
+#' A subclass of SPNCRefClass for NOAA Optimum Interpolation (OI) Sea Surface Temperature \url{http://www.esrl.noaa.gov/psd/data/gridded/data.noaa.oisst.v2.html}
+#' 
+#' @export
 OISSTRefClass <- setRefClass("OISSTRefClass",
     contains = "SPNCRefClass")
 

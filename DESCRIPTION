@@ -3,9 +3,9 @@ Title: A simplified interface between spatial classes and NetCDF data sources.
 Description: Provides a uniform interface for extracting spatial data types from various NetCDF sources.
 Version: 0.1
 Depends:
-    R (>= 3.0),
-    methods
+    R (>= 3.0)
 Imports:
+    methods,
     sp,
     ncdf4,
     raster

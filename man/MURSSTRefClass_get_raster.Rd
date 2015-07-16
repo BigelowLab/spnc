@@ -6,6 +6,9 @@
 \arguments{
 \item{what}{character one or more variable names or variable indices}
 
+\item{bb}{a 4 element bounding box vector [left, right, bottom, top], defaults
+to [-180, 180, -90, 90]}
+
 \item{layer}{numeric vector either a 1-based indices or POSIXct timestamps}
 
 \item{crs}{character, the coordiante reference system to apply}

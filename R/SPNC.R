@@ -1,7 +1,18 @@
-# An object that connects to NetCDF (file or OpeNDAP) using ncdf4
+#' An object that connects to NetCDF (file or OpeNDAP) using ncdf4
+#' 
+#' @export
+#' @field flavor a character vector of at least 'source' and 'type'
+#' @field the ncdf4 class object
+#' @field the 4 element bounding box
+#' @field the dimensions
+#' @field the variable names
+#' @field possibly a vector of lons
+#' @field possibly a vector of lats
+#' @field possibly a vector of z-values
+#' @field possibly a vector of times
 SPNCRefClass <- setRefClass("SPNCRefClass",
    fields = list(
-      flavor = 'character',# a vector of at least 'source' and 'type'
+      flavor = 'character',# 
       NC = 'ANY',          # the ncdf4 class object
       BB = 'numeric',      # the 4 element bounding box
       DIMS = 'numeric',    # the dimensions
