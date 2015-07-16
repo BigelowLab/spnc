@@ -2,6 +2,7 @@
 
 #' A subclass of SPNCRefClass for Modis Aqua \url{http://oceancolor.gsfc.nasa.gov/cms/}
 #' 
+#' @include SPNC.R
 #' @export 
 MODISL3SMIRefClass <- setRefClass("MODISL3SMIRefClass",
     contains = "SPNCRefClass",

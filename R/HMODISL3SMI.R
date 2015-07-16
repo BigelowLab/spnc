@@ -1,5 +1,11 @@
 # HMODISL3SMI
 
+#' A subclass of SPNCRefClass for Modis Aqua via \url{http://thredds.jpl.nasa.gov}
+#'
+#' Warning - metadata looks corrupted to me
+#' 
+#' @include SPNC.R
+#' @export
 HMODISL3SMIRefClass <- setRefClass("HMODISL3SMIRefClass",
     contains = "SPNCRefClass",
     methods = list(

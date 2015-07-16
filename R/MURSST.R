@@ -2,6 +2,7 @@
 
 #' A subclass of SPNCRefClass for Multi-scale Ultra-high Resolution Sea Surface Temperature \url{http://mur.jpl.nasa.gov/}
 #' 
+#' @include SPNC.R
 #' @export
 MURSSTRefClass <- setRefClass("MURSSTRefClass",
     contains = "SPNCRefClass")
