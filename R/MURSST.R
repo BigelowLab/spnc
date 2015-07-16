@@ -8,6 +8,8 @@ MURSSTRefClass <- setRefClass("MURSSTRefClass",
 #' 
 #' @name MURSSTRefClass_get_raster
 #' @param what character one or more variable names or variable indices
+#' @param bb a 4 element bounding box vector [left, right, bottom, top], defaults
+#'    to [-180, 180, -90, 90]
 #' @param layer numeric vector either a 1-based indices or POSIXct timestamps
 #' @param crs character, the coordiante reference system to apply
 #' @param flip logical if TRUE then flip the raster in the y direction
@@ -15,11 +17,11 @@ MURSSTRefClass <- setRefClass("MURSSTRefClass",
 #' @return a \code{raster::brick} or \code{raster::layer} object or NULL
 NULL
 MURSSTRefClass$methods(
-   get_raster = function(what = .self$VARS, layer = 1,
+   get_raster = function(what = .self$VARS, layer = 1, bb = .self$BB,
       crs = "+proj=longlat +datum=WGS84", 
-      flip = TRUE, time_fmt = "D%Y%%j"){
+      flip = TRUE, time_fmt = "D%Y%j"){
   
-      subnav <- .self$subset_coords(.self$BB, .self$LON, .self$LAT)
+      subnav <- .self$subset_coords(bb, .self$LON, .self$LAT)
       ext <- raster::extent(subnav[['bb']])
       
       getOneVar <- function(vname, NC, subnav, layer = 1,
