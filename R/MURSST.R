@@ -16,7 +16,8 @@ MURSSTRefClass <- setRefClass("MURSSTRefClass",
 NULL
 MURSSTRefClass$methods(
    get_raster = function(what = .self$VARS, layer = 1,
-      crs = "+proj=longlat +datum=WGS84", flip = TRUE, time_fmt = time_fmt){
+      crs = "+proj=longlat +datum=WGS84", 
+      flip = TRUE, time_fmt = "D%Y%%j"){
   
       subnav <- .self$subset_coords(.self$BB, .self$LON, .self$LAT)
       ext <- raster::extent(subnav[['bb']])
@@ -39,14 +40,14 @@ MURSSTRefClass$methods(
          ext = ext, crs = crs)
         
       if (length(what) > 1){   
-         X <- lapply(what, getOneVar, x$NC, subnav, crs = crs, layer = layer[1] )
+         X <- lapply(what, getOneVar, .self$NC, subnav, crs = crs, layer = layer[1] )
          for (w in names(X)) R <- addLayer(R, raster(t(X[[w]]), template = R))
          names(R) <- what
       } else {
-         X <- lapply(layer, getOneLayer, x$NC, subnav, crs = crs, what = what[1]) 
+         X <- lapply(layer, getOneLayer, .self$NC, subnav, crs = crs, what = what[1]) 
          for (r in X) R <- addLayer(R, raster(t(r), template = R))
-         if (length(x$TIME) > 1){
-            names(R) <- format(x$TIME[layer], time_fmt)
+         if (length(.self$TIME) > 1){
+            names(R) <- format(.self$TIME[layer], time_fmt)
          } else {
             names(R) <- paste("layer", layer, sep = "_")
          } 
