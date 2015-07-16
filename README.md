@@ -21,7 +21,7 @@ The repository is set up for installation using the [devtools](http://cran.r-pro
 
 ```R
 library(devtools)
-install_github("btupper/spnc")
+with_lib(.Library, install_github("btupper/spnc"))
 ```
 
 ### Usage
