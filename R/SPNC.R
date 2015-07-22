@@ -12,7 +12,7 @@
 #' @field possibly a vector of times
 SPNCRefClass <- setRefClass("SPNCRefClass",
    fields = list(
-      flavor = 'character',# 
+      flavor = 'list',# source=path, type=raster|point, local=logical
       NC = 'ANY',          # the ncdf4 class object
       BB = 'numeric',      # the 4 element bounding box
       DIMS = 'numeric',    # the dimensions
@@ -24,7 +24,7 @@ SPNCRefClass <- setRefClass("SPNCRefClass",
    methods = list(
          initialize = function(nc = NULL, bb = NULL, ...){
          
-         .self$field("flavor", c(source = "", type = ""))
+         .self$field("flavor", list(source = "", type = "", local = NA))
          .self$field("NC", NULL)
          .self$field("BB",  c(-180, 180, -90, 90))
          .self$field("DIMS", numeric())
@@ -52,7 +52,8 @@ SPNCRefClass$methods(
    show = function(){
       state <- if( .self$is_open() ) 'opened' else 'closed'
       cat("Reference Class:", classLabel(class(.self)), "\n")
-      cat("  flavor:", paste(.self$flavor, collapse = ":"), "\n") 
+      
+      cat("  flavor:", paste(names(X$flavor), X$flavor, sep = "=", collapse = " "), "\n") 
       cat("  state:", state, "\n")
       cat("  bounding box:", paste(.self$BB, collapse = " "), "\n")
       cat("  VARS:", paste(.self$VARS, collapse = " "), "\n")
@@ -139,6 +140,29 @@ SPNCRefClass$methods(
    }) # close
 
 
+#' Retrieve the variable names
+#'
+#' @name SPNCRefClass_get_varnames
+#' @return character vector or NULL
+NULL
+SPNCRefClass$methods(
+   get_varnames = function(){
+      d <- if (!is.null(.self$NC)) ncvarnames_get(.self$NC) else NULL
+      return(d)
+   })
+
+
+#' Retrieve a named vector of dimensions
+#'
+#' @name SPNCRefClass_get_dims
+#' @return a named numeric vector of dimensions or NULL
+NULL
+SPNCRefClass$methods(
+   get_dims = function(){
+      d <- if (!is.null(.self$NC)) ncdim_get(.self$NC) else NULL
+      return(d)
+   })
+
 #' Retrieve the subset coordinates 
 #' 
 #' @name SPNCRefClass_subset_coords
@@ -149,29 +173,7 @@ SPNCRefClass$methods(
 NULL
 SPNCRefClass$methods(
    subset_coords = function(bb = .self$BB, lon = .self$LON, lat = .self$LAT){
-   
-      if (is.null(bb)){
-         return( list(start = c(1,1), count = c(length(lon), length(lat)),
-            bb = c( range(lon), range(lat) ) ) )
-      }
-      
-      yDescends <- (lat[1] - lat[2]) < 0
-      
-      ix <- findInterval(bb[0:2], lon, all.inside = TRUE)
-      if (ix[2] < length(lon)) ix[2] <- ix[2] + 1
-      
-      if (yDescends){
-         iy <- findInterval(bb[3:4], lat, all.inside = TRUE)
-         if (iy[2] < length(lat)) iy[2] <- iy[2] + 1
-      } else {
-         iy <- findInterval(bb[3:4], rev(lat), all.inside = TRUE)
-         if (iy[2] < length(lat)) iy[2] <- iy[2] + 1
-      }
-      
-      
-      list(start = c(ix[1], iy[1]), 
-         count = c(ix[2]-ix[1]+1, iy[2]-iy[1]+1),
-         bb = c(lon[ix], lat[iy])  )
+      subset_nav(bb=bb,lon=lon,lat=lat)  
    })
 
 
@@ -289,8 +291,13 @@ SPNCRefClass$methods(
 #'    to [-180, 180, -90, 90]
 #' @param ... futher arguments
 #' @return a SPNCRefClass object or subclass or NULL
-SPNC <- function(nc,
-   bb = c(-180, 180, -90, 90), ...){
+SPNC <- function(nc, bb = c(-180, 180, -90, 90), ...){
+   
+   # if (grepl("windows", .Platform$OS.type, fixed = TRUE)){
+   #    cat("Windows platform detected\n")
+   #    cat("Be advised that OpeNDAP access with ncdf4 are problematic.\n")
+   #    cat("Local NetCDF file access is trouble free.\n")
+   # }
    
    if (!inherits(nc, "ncdf4")){
       nc <- try(ncdf4::nc_open(nc[1]))
@@ -302,6 +309,7 @@ SPNC <- function(nc,
    }
    flvr <- spnc_flavor(nc)
    X <- switch(tolower(flvr[['source']]),
+      'l3smi' = L3SMIRefClass$new(nc, bb = bb, ...),
       'oisst' = OISSTRefClass$new(nc, bb = bb, ...),
       'mursst' = MURSSTRefClass$new(nc, bb = bb, ...),
       'modisl3smi' = MODISL3SMIRefClass$new(nc, bb = bb, ...),

@@ -1,6 +1,8 @@
 # nc.R
 
 #' Retrieve a vector of dimensions
+#'
+#' @export
 #' @param NC a ncdf4 object
 #' @return a named vector of dimesnions
 ncdim_get <- function(NC){
@@ -8,6 +10,8 @@ ncdim_get <- function(NC){
 }
 
 #' Retrieve a vector of variable names
+#'
+#' @export
 #' @param NC a ncdf4 object
 #' @return a named vector variable names
 ncvarname_get <- function(NC){
@@ -16,6 +20,8 @@ ncvarname_get <- function(NC){
 
 
 #' Retrieve a vector of timestamps for a multilayer NC object or NULL otherwise
+#'
+#' @export
 #' @param NC a ncdf4 class object
 #' @param name the name of the time-associated variable, by default 'time'
 #' @param as_POSIXct logical, if TRUE then convert to POSIXct

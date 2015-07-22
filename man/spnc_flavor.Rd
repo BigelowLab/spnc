@@ -9,7 +9,12 @@ spnc_flavor(x)
 \arguments{
 \item{x}{the netcdf4 or SPNCRefClass object}
 
-\item{return}{character vector of source and type.  If each is "" then no flavor determined.}
+\item{return}{list of
+\itemize{
+  \item source character of 'MURSST', 'OISST', etc. "" means unknown
+  \item type character of 'raster', 'points', etc. "" means unknown
+  \item local logical (or NA) flag to indicate local or http source. NA mean unknown
+}}
 }
 \description{
 Determine the type and source of the netcdf data

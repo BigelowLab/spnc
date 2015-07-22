@@ -73,37 +73,3 @@ MODISL3SMIRefClass$methods(
    }) # MODISL3SMI_get_raster
 
 
-#' Retrieve the subset coordinates 
-#' 
-#' @name MODISL3SMIRefClass_subset_coords
-#' @param lon numeric vector of lons (ascending order please!) to select from
-#' @param lat numeric vector of lats (ditto)
-#' @return a list of \code{start} indices in x and y, \code{counts} in x and y and
-#'    a possibly updated copy of \code{bb} vector of [left, right, bottom, top]
-NULL
-SPNCRefClass$methods(
-   subset_coords = function(bb = .self$BB, lon = c(-180,180), lat = c(-90,90)){
-   
-      if (is.null(bb)){
-         return( list(start = c(1,1), count = c(length(lon), length(lat)),
-            bb = c( range(lon), range(lat) ) ) )
-      }
-      
-      yDescends <- (lat[1] - lat[2]) < 0
-      
-      ix <- findInterval(bb[0:2], lon, all.inside = TRUE)
-      if (ix[2] < length(lon)) ix[2] <- ix[2] + 1
-      
-      if (yDescends){
-         iy <- findInterval(bb[3:4], lat, all.inside = TRUE)
-         if (iy[2] < length(lat)) iy[2] <- iy[2] + 1
-      } else {
-         iy <- findInterval(bb[3:4], rev(lat), all.inside = TRUE)
-         if (iy[2] < length(lat)) iy[2] <- iy[2] + 1
-      }
-      
-      
-      list(start = c(ix[1], iy[1]), 
-         count = c(ix[2]-ix[1]+1, iy[2]-iy[1]+1),
-         bb = c(lon[ix], lat[iy])  )
-   })

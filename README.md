@@ -64,7 +64,7 @@ We try to follow the KISS principle by minimizing the exposure of details.
 
 + `open()` open the NetCDF connection
 + `close()` close the NetCDF connection
-+ `flavor()` retrieve the flavor of the NetCDF data (*e.g.* [source='OISST',type='raster'])
++ `flavor()` retrieve the flavor of the NetCDF data (*e.g.* [source='OISST',type='raster', local = TRUE/FALSE/NA])
 + `get_raster(bb, t)` retrieve a n-d array as SpatialRaster within the bounding box for the given times
 + `get_path(bb, t)` retrieve a path SpatialLinesDataFrame within the bounding box for the given times (not sure what this is just yet!)
 + `get_points(bb, t)` retrieve set of points as SpatialPointsDataFrame within the bounding box for the given times
@@ -74,6 +74,7 @@ We try to follow the KISS principle by minimizing the exposure of details.
 Establish the basics...
 
 ```R
+librayr(raster)
 library(spnc)
 bb <- c(-72,-63,39,46)
 ```
@@ -104,10 +105,19 @@ OISST_file = 'http://www.ncdc.noaa.gov/thredds/dodsC/OISST-V2-AVHRR_agg'
 OI <- SPNC(OISST_file, bb = bb)
 ```
 
++ `L3SMI`  [Ocean Color Level 3 Standard Mapped Image](http://oceancolor.gsfc.nasa.gov/cms)
+
+```R
+filename <- 'V20151932015200.L3m_8D_NPP_CHL_chlor_a_4km.nc'
+L3 <- SPNC(filename, bb = bb)
+raster::spplot(log10(L3))
+```
+
 + `MODISA`  [Modis Aqua](http://oceancolor.gsfc.nasa.gov/cms/)
 
 ```R
 MODISA_file <- 'http://oceandata.sci.gsfc.nasa.gov/opendap/MODISA/L3SMI/2008/001/A2008001.L3m_DAY_CHL_chlor_a_4km.nc'
 MO <- SPNC(MODISA_file, bb = bb)
 ```
+
 

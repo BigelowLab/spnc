@@ -76,7 +76,7 @@ HMODISL3SMIRefClass$methods(
 #' @return a list of \code{start} indices in x and y, \code{counts} in x and y and
 #'    a possibly updated copy of \code{bb} vector of [left, right, bottom, top]
 NULL
-SPNCRefClass$methods(
+HMODISL3SMIRefClass$methods(
    subset_coords = function(bb = .self$BB, 
       lon = .self$LON, 
       lat = .self$LAT){
