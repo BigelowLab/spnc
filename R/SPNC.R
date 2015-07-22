@@ -93,7 +93,7 @@ SPNCRefClass$methods(
          cat("the connection is already open!\nPlease close before reopening\n")
          return(FALSE)
       }
-      nc <- try(nc_open(path))
+      nc <- try(ncdf4::nc_open(path))
       
       if (inherits(NC, "try-error")){
          cat("unable to nc_open() the path:", path, "\n")
@@ -133,7 +133,7 @@ NULL
 SPNCRefClass$methods(
    close = function(){
       ok <- .self$is_open()
-      if (ok) nc_close(.self$NC)
+      if (ok) ncdf4::nc_close(.self$NC)
       .self$NC <- NULL
       return(TRUE)
    }) # close
@@ -283,6 +283,7 @@ SPNCRefClass$methods(
 
 #' A function to create an SPNCRefClass or subclass reference
 #' 
+#' @export
 #' @param nc 'ncdf4' class object or path to one
 #' @param bb a 4 element bounding box vector [left, right, bottom, top], defaults
 #'    to [-180, 180, -90, 90]
@@ -292,7 +293,7 @@ SPNC <- function(nc,
    bb = c(-180, 180, -90, 90), ...){
    
    if (!inherits(nc, "ncdf4")){
-      nc <- try(nc_open(nc[1]))
+      nc <- try(ncdf4::nc_open(nc[1]))
       if ((inherits(nc, "try-error"))) {
          cat("SPNC: unable to open", nc[1], "\n")
          cat("SPNC: nc argument must be path or ncdf4 class object\n")

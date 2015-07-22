@@ -30,35 +30,37 @@ OISSTRefClass$methods(
       
       getOneVar <- function(vname, NC, subnav, layer = 1,
          crs = "+proj=longlat +datum=WGS84"){
-         ncvar_get(NC, vname, 
+         ncdf4::ncvar_get(NC, vname, 
             start = c(subnav[['start']], layer[1]), 
             count = c(subnav[['count']], 1) )
       }
       getOneLayer <- function(layer, NC, subnav, what = names(NC[['var']])[[1]],
          crs = "+proj=longlat +datum=WGS84"){
-         ncvar_get(NC, what, 
+         ncdf4::ncvar_get(NC, what, 
             start = c(subnav[['start']], layer[1]), 
             count = c(subnav[['count']], 1) )
       }
       
       
-      R <- raster(nrow = subnav[['count']][2], ncol = subnav[['count']][1], 
-         ext = ext, crs = crs)
+      R <- raster::raster(nrow = subnav[['count']][2], 
+         ncol = subnav[['count']][1], ext = ext, crs = crs)
         
       if (length(what) > 1){   
          X <- lapply(what, getOneVar, .self$NC, subnav, crs = crs, layer = layer[1] )
-         for (w in names(X)) R <- addLayer(R, raster(t(X[[w]]), template = R))
+         for (w in names(X)) R <- raster::addLayer(R, raster::
+            raster(t(X[[w]]), template = R))
          names(R) <- what
       } else {
          X <- lapply(layer, getOneLayer, .self$NC, subnav, crs = crs, what = what[1]) 
-         for (r in X) R <- addLayer(R, raster(t(r), template = R))
+         for (r in X) R <- raster::addLayer(R, 
+            raster::raster(t(r), template = R))
          if (length(.self$TIME) > 1){
             names(R) <- format(x$TIME[layer], time_fmt)
          } else {
             names(R) <- paste("layer", layer, sep = "_")
          } 
       }
-      if (flip) R <- flip(R,"y")
+      if (flip) R <- raster::flip(R,"y")
       return(R)
    }) # OISST_get_raster
 
