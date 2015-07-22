@@ -17,13 +17,13 @@ spnc_flavor <- function(x){
       )
 
    if (inherits(x, "SPNCRefClass")){
-      atts <- try(ncatt_get(x$NC, varid = 0))
+      atts <- try(ncdf4::ncatt_get(x$NC, varid = 0))
    } else {
       if (!inherits(x, "ncdf4")) {
          cat("spnc_flavor: input must be SPNCRefClass or ncdf4 class\n")
          return(flvr)
       }
-      atts <- try(ncatt_get(x, varid = 0))
+      atts <- try(ncdf4::ncatt_get(x, varid = 0))
    }
     
    if (inherits(atts, "try-error")){
