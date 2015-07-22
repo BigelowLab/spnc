@@ -21,7 +21,35 @@ The repository is set up for installation using the [devtools](http://cran.r-pro
 
 ```R
 library(devtools)
+# for your own library
+install_github("btupper/spnc")
+# or for system wide installation (requires admin-level permissions)
 with_lib(.Library, install_github("btupper/spnc"))
+```
+
+If you are developing new data source readers and have the repo on your local platform then use the following.
+
+```R
+library(devtools)
+pkg_path <- '/path/to/spnc'
+install(pkg_path)
+```
+
+If you edit the code (with documentation as needed!) then you can easily re-install - sort of on the fly.
+
+```R
+library(spnc)
+x <- SPNC(some_resource)
+
+# edit, document and then redo the document/install process
+library(devtools)
+pkg_path <- '/path/to/spnc'
+
+document(pkg_path)
+install(pkg_path)
+
+# you may need to reinstantiate your reference *if* the definition or methods have changed in you edits
+x <- SPNC(some_resource)
 ```
 
 ### Usage
