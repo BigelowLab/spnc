@@ -6,6 +6,6 @@
 \alias{HMODISL3SMIRefClass-class}
 \title{A subclass of SPNCRefClass for Modis Aqua via \url{http://thredds.jpl.nasa.gov}}
 \description{
-Warning - metadata looks corrupted to me
+Warning - metadata looks corrupted - see get_global_atts() method
 }
 

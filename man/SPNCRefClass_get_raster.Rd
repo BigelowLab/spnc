@@ -9,6 +9,9 @@ first layer (time) is returned.}
 
 \item{layer}{numeric vector either a 1-based indices or POSIXct timestamps}
 
+\item{bb}{a 4 element bounding box vector [left, right, bottom, top], defaults
+to [-180, 180, -90, 90]}
+
 \item{crs}{character, the coordiante reference system to apply}
 
 \item{flip}{logical if TRUE then flip the raster in the y direction}

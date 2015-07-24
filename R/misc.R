@@ -25,7 +25,7 @@ spnc_flavor <- function(x){
 
    if (inherits(x, "SPNCRefClass")){
       atts <- try(ncdf4::ncatt_get(x$NC, varid = 0))
-      filename <- X$NC[['filename']]
+      filename <- x$NC[['filename']]
    } else {
       if (!inherits(x, "ncdf4")) {
          cat("spnc_flavor: input must be SPNCRefClass or ncdf4 class\n")
@@ -43,7 +43,7 @@ spnc_flavor <- function(x){
    # assign the local flag 
    if (!is.null(filename)) flvr[['local']] <- !grepl("^http", filename[1])
    
-   natts <- names(atts)
+   natts <- names(atts) <- tolower(names(atts))
 
 
    # try by title
@@ -52,15 +52,14 @@ spnc_flavor <- function(x){
    if ("title" %in% natts){
       
       #if ( nzchar(flvr[['source']]) ) return(flvr)
-      
-      if (grepl(lut[['L3SMI']], atts[['title']], fixed = TRUE)){
+      if (grepl(lut[['HMODISL3SMI']], atts[['title']], fixed = TRUE)){
+         flvr[['source']] <- "HMODISL3SMI"
+      } else if (grepl(lut[['L3SMI']], atts[['title']], fixed = TRUE)){
          flvr[['source']] <- "L3SMI"  # OBPG
       } else if (grepl(lut[['OISST']], atts[['title']], fixed = TRUE)){
          flvr[['source']] <- "OISST"
       } else if (grepl(lut[['MODISL3SMI']], atts[['title']], fixed = TRUE)){
          flvr[['source']] <- "MODISL3SMI"
-      } else if (grepl(lut[['HMODISL3SMI']], atts[['title']], fixed = TRUE)){
-         flvr[['source']] <- "HMODISL3SMI"
       } else if (grepl(lut[['MURSST']], atts[['title']], fixed = TRUE)){
          flvr[['source']] <- "MURSST"
       } else if (grepl(lut[['VIIRS']], atts[['title']], fixed = TRUE)){

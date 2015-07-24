@@ -9,13 +9,14 @@ L3SMIRefClass <- setRefClass("L3SMIRefClass",
     methods = list(
       init = function(...){
          callSuper(...)
-         atts <- ncdf4::ncatt_get(.self$NC, varid = 0)
-         nm <- strsplit(atts[['product_name']], ".", fixed = TRUE)[[1]][1]
-         .self$TIME <- as.POSIXct(nm, format = "A%Y%j", tz = "UTC")   
+         if (.self$is_local()) {
+            atts <- .self$get_global_atts()
+            nm <- strsplit(atts[['product_name']], ".", fixed = TRUE)[[1]][1]
+            .self$TIME <- as.POSIXct(nm, format = "A%Y%j", tz = "UTC") 
+         }   
       })
    )
    
-
 #' Get a raster
 #' 
 #' @name L3SMIRefClass_get_raster
@@ -74,7 +75,7 @@ L3SMIRefClass$methods(
             X <- lapply(layer, getOneLayer, .self$NC, subnav, crs = crs, what = what[1]) 
             for (r in X) R <- raster::addLayer(R, 
                raster::raster(t(r), template = R))
-            if (length(x$TIME) > 1){
+            if (length(.self$TIME) > 1){
                names(R) <- format(.self$TIME[layer], time_fmt)
             } else {
                names(R) <- paste("layer", layer, sep = "_")

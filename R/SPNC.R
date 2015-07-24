@@ -22,7 +22,8 @@ SPNCRefClass <- setRefClass("SPNCRefClass",
       Z = "ANY",           # possibly a vector of z-values
       TIME = 'ANY'),       # possibly a vector of times
    methods = list(
-         initialize = function(nc = NULL, bb = NULL, ...){
+      # initialize if a general kickoff
+      initialize = function(nc = NULL, bb = NULL, ...){
          
          .self$field("flavor", list(source = "", type = "", local = NA))
          .self$field("NC", NULL)
@@ -41,6 +42,17 @@ SPNCRefClass <- setRefClass("SPNCRefClass",
          }
          if (!is.null(bb)) .self$BB <- bb
          callSuper(...)
+      },
+      # init is a bit more specific and may be overwriten by subclasses
+      # in here we deal with extracting from the ncdf resource
+      init = function(nc){
+         .self$field("DIMS", ncdim_get(nc))
+         .self$field("VARS", names(nc[['var']])) 
+         if ("lon" %in% names(.self$DIMS)) .self$field("LON", nc[["dim"]][['lon']][['vals']])
+         if ("lat" %in% names(.self$DIMS)) .self$field("LAT", nc[["dim"]][['lat']][['vals']])
+         if ("zlev" %in% names(.self$DIMS)) .self$field("Z", nc[["dim"]][['zlev']][['vals']])
+         if ("time" %in% names(.self$DIMS)) .self$field("TIME", nctime_get(nc))
+         return(TRUE)
       })
    )
    
@@ -53,7 +65,7 @@ SPNCRefClass$methods(
       state <- if( .self$is_open() ) 'opened' else 'closed'
       cat("Reference Class:", classLabel(class(.self)), "\n")
       
-      cat("  flavor:", paste(names(X$flavor), X$flavor, sep = "=", collapse = " "), "\n") 
+      cat("  flavor:", paste(names(.self$flavor), .self$flavor, sep = "=", collapse = " "), "\n") 
       cat("  state:", state, "\n")
       cat("  bounding box:", paste(.self$BB, collapse = " "), "\n")
       cat("  VARS:", paste(.self$VARS, collapse = " "), "\n")
@@ -69,6 +81,22 @@ SPNCRefClass$methods(
       invisible(NULL)
    }) # show     
 
+
+#' Test if this is a local file 
+#'
+#' @name SPNCRefClass_is_local
+#' @return logical
+NULL
+SPNCRefClass$methods(
+   is_local = function(){
+   
+      # flavor[['local']] could be NA, TRUE or FALSE.  If NA then we return FALSE
+      if (is.na(.self$flavor[['local']])) {
+         return(FALSE)
+      } else {
+         return(.self$flavor[['local']])
+      }
+   })
 
 #' Test if the ncdf4 path is open
 #'
@@ -109,22 +137,6 @@ SPNCRefClass$methods(
    }) # open
 
 
-#' Init for GENERIC data
-#'
-#' @name SPNCRRefClass_init
-#' @return logical
-NULL
-SPNCRefClass$methods(
-   init = function(nc){
-      .self$field("DIMS", ncdim_get(nc))
-      .self$field("VARS", names(nc[['var']])) 
-      if ("lon" %in% names(.self$DIMS)) .self$field("LON", nc[["dim"]][['lon']][['vals']])
-      if ("lat" %in% names(.self$DIMS)) .self$field("LAT", nc[["dim"]][['lat']][['vals']])
-      if ("zlev" %in% names(.self$DIMS)) .self$field("Z", nc[["dim"]][['zlev']][['vals']])
-      if ("time" %in% names(.self$DIMS)) .self$field("TIME", nctime_get(nc))
-      return(TRUE)
-   })
-   
 
 #' Close the ncdf4 object if it is not closed already
 #'
@@ -140,6 +152,17 @@ SPNCRefClass$methods(
    }) # close
 
 
+#' Get global attributes
+#'
+#' @name SPNCRefClass_get_global_atts
+#' @return a named list of global attributes or NULL
+NULL
+SPNCRefClass$methods(
+   get_global_atts = function(){
+      d <- if (!is.null(.self$NC)) ncatt_get(.self$NC, varid = 0) else NULL
+      return(d)
+   })
+   
 #' Retrieve the variable names
 #'
 #' @name SPNCRefClass_get_varnames
@@ -217,13 +240,15 @@ SPNCRefClass$methods(
 #' @name SPNCRefClass_get_raster
 #' @param what character one or more variable names or variable indices
 #' @param layer numeric vector either a 1-based indices or POSIXct timestamps
+#' @param bb a 4 element bounding box vector [left, right, bottom, top], defaults
+#'    to [-180, 180, -90, 90]
 #' @param crs character, the coordiante reference system to apply
 #' @param flip logical if TRUE then flip the raster in the y direction
 #' @param time_fmt if multiple time layers are returned, this controls the layer names
 #' @return a \code{raster::brick} or \code{raster::layer} object or NULL
 NULL
 SPNCRefClass$methods(
-   get_raster = function(what = .self$VARS, layer = 1, 
+   get_raster = function(what = .self$VARS, layer = 1, bb = .self$BB,
       crs = "+proj=longlat +datum=WGS84", flip = TRUE,
       time_fmt = "D%Y%m%d"){
       
