@@ -159,7 +159,7 @@ SPNCRefClass$methods(
 NULL
 SPNCRefClass$methods(
    get_global_atts = function(){
-      d <- if (!is.null(.self$NC)) ncatt_get(.self$NC, varid = 0) else NULL
+      d <- if (!is.null(.self$NC)) ncdf4::ncatt_get(.self$NC, varid = 0) else NULL
       return(d)
    })
    
