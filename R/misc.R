@@ -120,3 +120,36 @@ subset_nav <- function(bb = NULL, lon = c(-180,180), lat = c(-90,90)){
       count = c(ix[2]-ix[1]+1, iy[2]-iy[1]+1),
       bb = newbb  )
 }
+
+
+#' Extract a matrix of data from a SPNCRefClass of raster flavor
+#' 
+#' @export
+#' @param x the SPNCRefClass or subclass object
+#' @param var character, the name of the variable
+#' @param layer index of the layer (by default the first)
+#' @param ... further arguments for SPNC$get_raster() method
+#' @return a numeric matrix or NULL
+get_matrix <- function(x, var, layer = 1,...){
+   
+   if (missing(x) || missing(var)) {
+      cat("get_matrix: x and var are required\n")
+      return(NULL)
+   }
+   
+   if (x$flavor[['type']] != 'raster'){
+      cat("get_matrix: SPNC flavor must be of type raster\n")
+      return(NULL)
+   }
+   
+   r <- try(x$get_raster(var, layer = layer,...))
+   if (inherits(r, "try-error")){
+      cat("get_matrix: error in get_raster method\n")
+      return(NULL)
+   }
+   
+   m <- as.matrix(r[[1]])
+   rownames(m) <- raster::yFromRow(r)
+   colnames(m) <- raster::xFromCol(r)
+   invisible(m)  
+}

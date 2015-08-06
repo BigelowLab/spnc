@@ -19,6 +19,28 @@ ncvarname_get <- function(NC){
 }
 
 
+#' Retrieve a list of dimension vectors, one for each variable
+#'
+#' @export
+#' @param NC a ncdf4 object
+#' @return a named list of variable dimension vectors
+ncvardim_get <- function(NC){
+   vn <- names(NC[['var']])
+   names(vn) <- vn
+   get_vardim <- function(nm, NC = NULL){
+      d <- NC[['var']][[nm]]
+      get_vardim_one <- function(x){
+         len <- x[['len']]
+         names(len) <- x[['name']]
+         return(len)
+      }
+      
+      dims <- d[['dim']]
+      sapply(dims, get_vardim_one)
+   }
+   lapply(vn, get_vardim, NC = NC)
+}
+
 #' Retrieve a vector of timestamps for a multilayer NC object or NULL otherwise
 #'
 #' @export

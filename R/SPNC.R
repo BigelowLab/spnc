@@ -170,7 +170,7 @@ SPNCRefClass$methods(
 NULL
 SPNCRefClass$methods(
    get_varnames = function(){
-      d <- if (!is.null(.self$NC)) ncvarnames_get(.self$NC) else NULL
+      d <- if (!is.null(.self$NC)) ncvarname_get(.self$NC) else NULL
       return(d)
    })
 
@@ -254,55 +254,8 @@ SPNCRefClass$methods(
       
       cat("SPNCRefClass$get_raster: not implemented\n")
       return(NULL)
-      # if (.self$flavor[['type']] != 'raster'){
-      #    cat("SPNC$get_raster: flavor is not of type raster\n")
-      #    return(NULL)
-      # }
-      # 
-      # if (!nzchar(.self$flavor[['source']])){
-      #    cat("SPNC$get_raster: flavor source is not specified\n")
-      #    return(NULL)
-      # }
-      # 
-      # if (!.self$is_open()) {
-      #    cat("SPNC$get_raster: Please open the file first\n")
-      #    return(NULL)
-      # }
-      # # convert varid index to varid character
-      # if (is.numeric(what)) what <- unname(.self$VARS[what])
-      # # check the varid
-      # if ( !all(what %in% .self$VARS) ) {
-      #    cat("one or more varid not found:", paste(varid, collapse = " "), "\n")
-      #    return(NULL)
-      # }
-      # if (inherits(layer, "POSIXct") && (length(.self$TIME) > 1) ){
-      #    ilayer <- findInterval(layer, .self$TIME, all.inside = TRUE)
-      # } else {
-      #    ilayer = as.numeric(layer)
-      # }
-      # 
-      # nwhat <- length(what)
-      # nlayer <- length(ilayer)
-      # if ( (nlayer > 1) && (nwhat > 1)){ 
-      #    cat("Either length or what must be length 1\n")
-      #    return(NULL)
-      # }
-      # 
-      # 
-      # subnav <- switch(.self$flavor[['source']],
-      #    "OISST" = subset_coords(.self$BB, to180(.self$LON), .self$LAT),
-      #    subset_coords(.self$BB, .self$LON, .self$LAT))
-      # 
-      # names(what) <- what
-      # 
-      # R <- switch(.self$flavor[['source']],
-      #    'MURSST' = MUR_get_raster(.self, what = what, layer = ilayer, crs = crs, subnav = subnav, time_fmt = time_fmt),
-      #    'OISST' = OISST_get_raster(.self, what = what, layer = ilayer, crs = crs, subnav = subnav),
-      #    'MODISL3SMI' = MODISL3SMI_get_raster(.self, what = what, ilayer = layer, crs = crs, subnav = subnav),
-      #    NULL)
-      # return(R)
+ 
    }) # get_raster
-
 
 
 ##### methods above
