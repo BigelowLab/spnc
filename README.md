@@ -81,6 +81,8 @@ bb <- c(-72,-63,39,46)
 
 + `MURSST` [Multi-scale Ultra-high Resolution Sea Surface Temperature](http://mur.jpl.nasa.gov/)
 
+JPL's PO.DAAC provides this data as an NCML (filename.ncml) - an XML file that the NetCDF-4 library happily reads as if it were a NetCDF file.   THis provides easy access to data at different times, so not only does one collect data from geographic subregions but for different times.  
+
 ```R
 MUR_file <- 'http://thredds.jpl.nasa.gov/thredds/dodsC/ncml_aggregation/OceanTemperature/ghrsst/aggregate__ghrsst_JPL-L4UHfnd-GLOB-MUR.ncml'
 MUR <- SPNC(MUR_file, bb = bb)
