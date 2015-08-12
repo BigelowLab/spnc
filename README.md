@@ -54,7 +54,7 @@ x <- SPNC(some_resource)
 
 ### Usage
 
-We try to follow the KISS principle by minimizing the exposure of details.
+We try to follow the KISS principle by minimizing the exposure of details.  See the [wiki](https://github.com/btupper/spnc/wiki) for examples.
 
 #### Instantiate
 + `SPNC(ncdf_resource_or_filename, bb)` create an instance of SPNCRefClass or subclass with the provided bounding box.
