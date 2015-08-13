@@ -33,6 +33,9 @@ L3SMIRefClass$methods(
    get_raster = function(what = .self$VARS[1], layer = 1,bb = .self$BB,
       crs = "+proj=longlat +datum=WGS84", flip = FALSE, time_fmt = "D%Y%j"){
 
+      if (!all(what %in% .self$VARS))
+         stop("one or more requested variable(s) not in data:", paste(what, collapse = "\n"))
+         
       R <- L3SMI_get_raster(.self, what=what, layer = layer, bb = bb,
          crs = crs, flip = flip, time_fmt = time_fmt)
       return(R)
