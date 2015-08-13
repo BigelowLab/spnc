@@ -71,38 +71,22 @@ We try to follow the KISS principle by minimizing the exposure of details.  See 
 
 #### Known sources of data
 
-Establish the basics...
++ `L3SMI`  [Ocean Color Level 3 Standard Mapped Image](http://oceancolor.gsfc.nasa.gov/cms)
 
-```R
-librayr(raster)
-library(spnc)
-bb <- c(-72,-63,39,46)
-```
+The Ocean Color group provides Level3 Standard Mapped Images (L3SMI) for a variety of products. See more in the [wiki](https://github.com/btupper/spnc/wiki/MODIS-and-OBPG) on how to programmatically search their database.  Test on MODISA CHL and SST.
+
 
 + `MURSST` [Multi-scale Ultra-high Resolution Sea Surface Temperature](http://mur.jpl.nasa.gov/)
 
 JPL's PO.DAAC provides this data as an NCML (filename.ncml) - an XML file that the NetCDF-4 library happily reads as if it were a NetCDF file.   THis provides easy access to data at different times, so not only does one collect data from geographic subregions but for different times.  See the [wiki](https://github.com/btupper/spnc/wiki/MUR-and-NCML) for details.
 
+
 + `OISST` [NOAA Optimum Interpolation (OI) Sea Surface Temperature ](http://www.esrl.noaa.gov/psd/data/gridded/data.noaa.oisst.v2.html)
 
 ```R
+library(spnc)
 OISST_file = 'http://www.ncdc.noaa.gov/thredds/dodsC/OISST-V2-AVHRR_agg'
 OI <- SPNC(OISST_file, bb = bb)
-```
-
-+ `L3SMI`  [Ocean Color Level 3 Standard Mapped Image](http://oceancolor.gsfc.nasa.gov/cms)
-
-```R
-filename <- 'V20151932015200.L3m_8D_NPP_CHL_chlor_a_4km.nc'
-L3 <- SPNC(filename, bb = bb)
-raster::spplot(log10(L3))
-```
-
-+ `MODISA`  [Modis Aqua](http://oceancolor.gsfc.nasa.gov/cms/)
-
-```R
-MODISA_file <- 'http://oceandata.sci.gsfc.nasa.gov/opendap/MODISA/L3SMI/2008/001/A2008001.L3m_DAY_CHL_chlor_a_4km.nc'
-MO <- SPNC(MODISA_file, bb = bb)
 ```
 
 
