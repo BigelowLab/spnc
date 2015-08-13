@@ -81,7 +81,7 @@ bb <- c(-72,-63,39,46)
 
 + `MURSST` [Multi-scale Ultra-high Resolution Sea Surface Temperature](http://mur.jpl.nasa.gov/)
 
-JPL's PO.DAAC provides this data as an NCML (filename.ncml) - an XML file that the NetCDF-4 library happily reads as if it were a NetCDF file.   THis provides easy access to data at different times, so not only does one collect data from geographic subregions but for different times.  See the [wiki](https://github.com/btupper/spnc/wiki/MUR-and-NCML.md) for details.
+JPL's PO.DAAC provides this data as an NCML (filename.ncml) - an XML file that the NetCDF-4 library happily reads as if it were a NetCDF file.   THis provides easy access to data at different times, so not only does one collect data from geographic subregions but for different times.  See the [wiki](https://github.com/btupper/spnc/wiki/MUR-and-NCML) for details.
 
 + `OISST` [NOAA Optimum Interpolation (OI) Sea Surface Temperature ](http://www.esrl.noaa.gov/psd/data/gridded/data.noaa.oisst.v2.html)
 
