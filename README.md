@@ -48,7 +48,7 @@ pkg_path <- '/path/to/spnc'
 document(pkg_path)
 install(pkg_path)
 
-# you may need to reinstantiate your reference *if* the definition or methods have changed in you edits
+# you may need to reinstantiate your reference *if* the definition or methods have changed in your edits
 x <- SPNC(some_resource)
 ```
 
@@ -57,7 +57,10 @@ x <- SPNC(some_resource)
 We try to follow the KISS principle by minimizing the exposure of details.  See the [wiki](https://github.com/btupper/spnc/wiki) for examples.
 
 #### Instantiate
+
 + `SPNC(ncdf_resource_or_filename, bb)` create an instance of SPNCRefClass or subclass with the provided bounding box.
+
+`bb` is a 4 element vector that follows the pattern of the `Extent` class in the `sp` package: [xmin, xmax, ymin, ymax].  If you set the bounding box when you instantiate the SPNC object, then it is used as the default for subsequent calls to the methods shown below, unless you specifically override the value. 
 
 #### Properties
 #### Methods
@@ -73,7 +76,7 @@ We try to follow the KISS principle by minimizing the exposure of details.  See 
 
 + `L3SMI`  [Ocean Color Level 3 Standard Mapped Image](http://oceancolor.gsfc.nasa.gov/cms)
 
-The Ocean Color group provides Level3 Standard Mapped Images (L3SMI) for a variety of products. See more in the [wiki](https://github.com/btupper/spnc/wiki/MODIS-and-OBPG) on how to programmatically search their database.  Test on MODISA CHL and SST.
+The Ocean Color group provides Level3 Standard Mapped Images (L3SMI) for a variety of products. See more in the [wiki](https://github.com/btupper/spnc/wiki/MODIS-and-OBPG) on how to programmatically search their database.  Tested on MODISA CHL and SST.  Note, a companion package, [obpgcrawler](https://github.com/btupper/obpgcrawler), is available to programmatically find [Ocean Color](http://oceancolor.gsfc.nasa.gov/cms) data.
 
 
 + `MURSST` [Multi-scale Ultra-high Resolution Sea Surface Temperature](http://mur.jpl.nasa.gov/)
@@ -83,10 +86,17 @@ JPL's PO.DAAC provides this data as an NCML (filename.ncml) - an XML file that t
 
 + `OISST` [NOAA Optimum Interpolation (OI) Sea Surface Temperature ](http://www.esrl.noaa.gov/psd/data/gridded/data.noaa.oisst.v2.html)
 
+Under development.
+
 ```R
-library(spnc)
 OISST_file = 'http://www.ncdc.noaa.gov/thredds/dodsC/OISST-V2-AVHRR_agg'
 OI <- SPNC(OISST_file, bb = bb)
 ```
 
++ `NHSCE` [Northern Hemisphere Snow Cover Extent](https://climatedataguide.ucar.edu/climate-data/snow-cover-extent-northern-hemisphere-climate-data-record-rutgers) 
 
+```R
+snow <- SPNC('http://www.ncdc.noaa.gov/thredds/dodsC/cdr/snowcover/nhsce_v01r01_19661004_latest.nc')
+```
+
+Under development. Provides mask and areal extent using a modified grid.

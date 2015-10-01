@@ -19,6 +19,7 @@ Collate:
     'L3SMI.R'
     'MODISL3SMI.R'
     'MURSST.R'
+    'NHSCE.R'
     'OISST.R'
     'SPNC-package.R'
     'misc.R'

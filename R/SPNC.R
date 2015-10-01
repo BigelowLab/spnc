@@ -292,6 +292,7 @@ SPNC <- function(nc, bb = c(-180, 180, -90, 90), ...){
       'mursst' = MURSSTRefClass$new(nc, bb = bb, ...),
       'modisl3smi' = MODISL3SMIRefClass$new(nc, bb = bb, ...),
       'hmodisl3smi' = HMODISL3SMIRefClass$new(nc, bb = bb, ...),
+      'nhsce' = NHSCERefClass$new(nc, bb = bb, ...),
       SPNCRefClass$new(nc, bb = bb, ...))
    
    invisible(X)

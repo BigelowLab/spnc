@@ -20,7 +20,8 @@ spnc_flavor <- function(x){
       HMODISL3SMI = 'HMODISA Level-3 Standard Mapped Image',
       MURSST = 'Multi-scale Ultra-high Resolution (MUR) SST analysis',
       VIIRS = 'VIIRS Level-3 Standard Mapped Image',
-      L3SMI = 'Level-3 Standard Mapped Image'
+      L3SMI = 'Level-3 Standard Mapped Image',
+      NHSCE = "Climate Data Record (CDR) of Northern Hemisphere (NH) Snow Cover Extent (SCE) (CDR Name: Snow_Cover_Extent_NH_IMS_Robinson)"
       )
 
    if (inherits(x, "SPNCRefClass")){
@@ -64,6 +65,8 @@ spnc_flavor <- function(x){
          flvr[['source']] <- "MURSST"
       } else if (grepl(lut[['VIIRS']], atts[['title']], fixed = TRUE)){
          flvr[['source']] <- "VIIRS"
+      } else if (grepl(lut[['NHSCE']], atts[['title']], fixed = TRUE)){
+         flvr[['source']] <- "NHSCE"
       }
    }
    
