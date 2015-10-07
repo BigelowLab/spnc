@@ -113,18 +113,19 @@ SPNCRefClass$methods(
 #' #' @name SPNCRefClass_open
 #' @param path the path to the connection, if not present then try the 
 #'     object's path
+#' @param ... furtehr arguments for ncfd4::nc_open
 #' @return logical
 NULL
 SPNCRefClass$methods(
-   open = function(path){
+   open = function(path, ...){
       ok <- .self$is_open()
       if (ok == TRUE){
          cat("the connection is already open!\nPlease close before reopening\n")
          return(FALSE)
       }
-      nc <- try(ncdf4::nc_open(path))
+      nc <- try(ncdf4::nc_open(path,...))
       
-      if (inherits(NC, "try-error")){
+      if (inherits(nc, "try-error")){
          cat("unable to nc_open() the path:", path, "\n")
          .self$field("NC", NULL)
          return(FALSE)
@@ -267,9 +268,12 @@ SPNCRefClass$methods(
 #' @param nc 'ncdf4' class object or path to one
 #' @param bb a 4 element bounding box vector [left, right, bottom, top], defaults
 #'    to [-180, 180, -90, 90]
+#' @param nc_verbose logical, passed to ncdf4::nc_open
+#' @param n_tries numeric, when nc is a path we try to open upt to n_tries before failing
+#'    This helps accomodate occasional network/server issues.
 #' @param ... futher arguments
 #' @return a SPNCRefClass object or subclass or NULL
-SPNC <- function(nc, bb = c(-180, 180, -90, 90), ...){
+SPNC <- function(nc, bb = c(-180, 180, -90, 90), nc_verbose = FALSE, n_tries = 3, ...){
    
    # if (grepl("windows", .Platform$OS.type, fixed = TRUE)){
    #    cat("Windows platform detected\n")
@@ -278,12 +282,26 @@ SPNC <- function(nc, bb = c(-180, 180, -90, 90), ...){
    # }
    
    if (!inherits(nc, "ncdf4")){
-      nc <- try(ncdf4::nc_open(nc[1]))
-      if ((inherits(nc, "try-error"))) {
-         cat("SPNC: unable to open", nc[1], "\n")
-         cat("SPNC: nc argument must be path or ncdf4 class object\n")
-         return(NULL)
+      path <- nc[1]
+      i <- 1
+      nc <- NULL
+      while(i <= n_tries){
+         nc <- try(ncdf4::nc_open(path, verbose = nc_verbose))
+         if (inherits(nc, 'try-error')){
+            if (i < n_tries) {
+               cat(sprintf("  attempt %i failed, trying again\n", i))
+            } else {
+               cat("  exhausted permitted tries, returning NULL\n")
+            }
+            nc <- NULL
+            i <- i + 1
+         } else {
+            if (i > 1) cat(sprintf("  whew!  attempt %i successful\n", i))
+            break
+         }
       }
+      if (is.null(nc) || inherits(nc, 'try-error')) return(NULL)
+      
    }
    flvr <- spnc_flavor(nc)
    X <- switch(tolower(flvr[['source']]),

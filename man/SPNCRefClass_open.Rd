@@ -6,6 +6,8 @@
 \arguments{
 \item{path}{the path to the connection, if not present then try the
 object's path}
+
+\item{...}{furtehr arguments for ncfd4::nc_open}
 }
 \value{
 logical
