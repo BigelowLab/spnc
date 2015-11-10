@@ -1,5 +1,24 @@
 # nc.R
 
+
+#' Retrieve a named list of global attributes
+#'
+#' @export
+#' @param NC a ncdf4 object
+#' @param rm_pattern character a pattern of characters to remove from the 
+#'    attribute names.  By default 'NC_GLOBAL.'.  Set to "" or NA to skip
+#' @param fixed logical by default TRUE but see \code{grepl}
+#' @return named vector of global attributes
+ncglobal_atts <- function(NC, rm_pattern = 'NC_GLOBAL.', fixed = TRUE){
+   d <- if (!is.null(NC)) ncdf4::ncatt_get(NC, varid = 0) else NULL
+   if (!is.null(d)){
+      if (!is.na(rm_pattern) && (nchar(rm_pattern) > 0)){
+         names(d) <- gsub("NC_GLOBAL.", "", names(d), fixed = TRUE)
+      }
+   }
+   return(d)
+}
+
 #' Retrieve a vector of dimensions
 #'
 #' @export

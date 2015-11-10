@@ -3,6 +3,9 @@
 \name{SPNCRefClass_get_global_atts}
 \alias{SPNCRefClass_get_global_atts}
 \title{Get global attributes}
+\arguments{
+\item{...}{further arguments for \code{ncglobal_atts}}
+}
 \value{
 a named list of global attributes or NULL
 }

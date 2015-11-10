@@ -25,14 +25,16 @@ spnc_flavor <- function(x){
       )
 
    if (inherits(x, "SPNCRefClass")){
-      atts <- try(ncdf4::ncatt_get(x$NC, varid = 0))
+      atts <- try(x$get_global_atts())
+      #atts <- try(ncdf4::ncatt_get(x$NC, varid = 0))
       filename <- x$NC[['filename']]
    } else {
       if (!inherits(x, "ncdf4")) {
          cat("spnc_flavor: input must be SPNCRefClass or ncdf4 class\n")
          return(flvr)
       }
-      atts <- try(ncdf4::ncatt_get(x, varid = 0))
+      atts <- try(ncglobal_atts(x))
+      #atts <- try(ncdf4::ncatt_get(x, varid = 0))
       filename <- x[['filename']]
    }
     
@@ -50,8 +52,7 @@ spnc_flavor <- function(x){
    # try by title
    # note that the default type is 'raster' but others, as needed,
    # must be assigned with flvr[['type']] <- 'points' or whatever
-   #if ("title" %in% natts){
-   if (grepl("title", natts, fixed = TRUE){ 
+   if ("title" %in% natts){
       #if ( nzchar(flvr[['source']]) ) return(flvr)
       if (grepl(lut[['HMODISL3SMI']], atts[['title']], fixed = TRUE)){
          flvr[['source']] <- "HMODISL3SMI"

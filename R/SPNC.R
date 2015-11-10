@@ -156,12 +156,14 @@ SPNCRefClass$methods(
 #' Get global attributes
 #'
 #' @name SPNCRefClass_get_global_atts
+#' @param ... further arguments for \code{ncglobal_atts} 
 #' @return a named list of global attributes or NULL
 NULL
 SPNCRefClass$methods(
-   get_global_atts = function(){
-      d <- if (!is.null(.self$NC)) ncdf4::ncatt_get(.self$NC, varid = 0) else NULL
-      return(d)
+   get_global_atts = function(...){
+      #d <- if (!is.null(.self$NC)) ncdf4::ncatt_get(.self$NC, varid = 0) else NULL
+      #if (!is.null(d)) names(d) <- gsub("NC_GLOBAL.", "", names(d), fixed = TRUE)
+      return(ncglobal_atts(.self$NC, ...))
    })
    
 #' Retrieve the variable names
