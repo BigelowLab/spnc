@@ -50,8 +50,8 @@ spnc_flavor <- function(x){
    # try by title
    # note that the default type is 'raster' but others, as needed,
    # must be assigned with flvr[['type']] <- 'points' or whatever
-   if ("title" %in% natts){
-      
+   #if ("title" %in% natts){
+   if (grepl("title", natts, fixed = TRUE){ 
       #if ( nzchar(flvr[['source']]) ) return(flvr)
       if (grepl(lut[['HMODISL3SMI']], atts[['title']], fixed = TRUE)){
          flvr[['source']] <- "HMODISL3SMI"
