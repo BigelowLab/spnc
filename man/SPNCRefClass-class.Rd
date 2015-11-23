@@ -13,20 +13,18 @@ An object that connects to NetCDF (file or OpeNDAP) using ncdf4
 \describe{
 \item{\code{flavor}}{a character vector of at least 'source' and 'type'}
 
-\item{\code{the}}{ncdf4 class object}
+\item{\code{NC}}{the ncdf4 class object}
 
-\item{\code{the}}{4 element bounding box}
+\item{\code{BB}}{the 4 element bounding box}
 
-\item{\code{the}}{dimensions}
+\item{\code{DIM}}{the dimensions}
 
-\item{\code{the}}{variable names}
+\item{\code{VAR}}{the variable names}
 
-\item{\code{possibly}}{a vector of lons}
+\item{\code{STEP}}{2 element vector of x and y step size (or NULL)}
 
-\item{\code{possibly}}{a vector of lats}
+\item{\code{Z}}{possibly a vector of z-values}
 
-\item{\code{possibly}}{a vector of z-values}
-
-\item{\code{possibly}}{a vector of times}
+\item{\code{TIME}}{possibly a vector of times}
 }}
 

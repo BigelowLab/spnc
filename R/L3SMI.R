@@ -1,8 +1,5 @@
 # L3SMI.R
 
-
-
-
 #' A subclass of SPNCRefClass for OBPG L3 Standard Mapped Image
 #' 
 #' @include SPNC.R
@@ -12,9 +9,9 @@ L3SMIRefClass <- setRefClass("L3SMIRefClass",
     methods = list(
       init = function(...){
          callSuper(...)
-            atts <- .self$get_global_atts()
-            nm <- strsplit(atts[['product_name']], ".", fixed = TRUE)[[1]][1]
-            .self$TIME <- as.POSIXct(nm, format = "A%Y%j", tz = "UTC")   
+         atts <- .self$get_global_atts()
+         nm <- strsplit(atts[['product_name']], ".", fixed = TRUE)[[1]][1]
+         .self$TIME <- as.POSIXct(nm, format = "A%Y%j", tz = "UTC")   
       })
    )
 
@@ -31,7 +28,7 @@ L3SMIRefClass$methods(
       atts <- .self$get_global_atts()
       lat <- .self$lat()
       onelat <- if (lat[2]-lat[1] > 0) ? 1 else -1
-      c(atts[['longitude_step']], one*atts[['latitude_step']])
+      c(atts[['longitude_step']], onelat*atts[['latitude_step']])
    })
    
    
@@ -98,7 +95,7 @@ L3SMI_get_raster <- function(NC, what = NC$VARS[1], layer = 1,bb = NC$BB,
    
    stopifnot(inherits(NC, "L3SMIRefClass"))
    subnav <- NC$subset_bbox(bb)
-   ext <- NC$extent(bb = subnav[['bb']])
+   ext <- NC$get_extent(bb = subnav[['bb']])
    
    R <- raster::raster(nrow = subnav[['count']][2], 
       ncol = subnav[['count']][1],  ext = ext, crs = crs) 

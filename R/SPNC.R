@@ -2,14 +2,13 @@
 #' 
 #' @export
 #' @field flavor a character vector of at least 'source' and 'type'
-#' @field the ncdf4 class object
-#' @field the 4 element bounding box
-#' @field the dimensions
-#' @field the variable names
-#' @field possibly a vector of lons
-#' @field possibly a vector of lats
-#' @field possibly a vector of z-values
-#' @field possibly a vector of times
+#' @field NC the ncdf4 class object
+#' @field BB the 4 element bounding box
+#' @field DIM the dimensions
+#' @field VAR the variable names
+#' @field STEP 2 element vector of x and y step size (or NULL)
+#' @field Z possibly a vector of z-values
+#' @field TIME possibly a vector of times
 SPNCRefClass <- setRefClass("SPNCRefClass",
    fields = list(
       flavor = 'list',# source=path, type=raster|point, local=logical
@@ -17,21 +16,19 @@ SPNCRefClass <- setRefClass("SPNCRefClass",
       BB = 'numeric',      # the 4 element bounding box
       DIMS = 'numeric',    # the dimensions
       VARS = 'character',  # the variable names
-      #LON = "ANY",         # possibly a vector of lons
-      #LAT = "ANY",         # possibly a vector of lats
+      STEP = "ANY",
       Z = "ANY",           # possibly a vector of z-values
       TIME = 'ANY'),       # possibly a vector of times
    methods = list(
       # initialize if a general kickoff
       initialize = function(nc = NULL, bb = NULL, ...){
-         
+         #callSuper(...)
          .self$field("flavor", list(source = "", type = "", local = NA))
          .self$field("NC", NULL)
          .self$field("BB",  c(-180, 180, -90, 90))
          .self$field("DIMS", numeric())
          .self$field("VARS", character())
-         #.self$field("LON", NULL)
-         #.self$field("LAT", NULL)
+         .self$field("STEP", NULL)
          .self$field("Z", NULL)
          .self$field("TIME", NULL)
          
@@ -41,14 +38,16 @@ SPNCRefClass <- setRefClass("SPNCRefClass",
             .self$init(nc)
          }
          if (!is.null(bb)) .self$BB <- bb
-         callSuper(...)
+         
       },
       # init is a bit more specific and may be overwriten by subclasses
       # in here we deal with extracting from the ncdf resource
       init = function(nc){
          .self$field("DIMS", ncdim_get(nc))
-         .self$field("VARS", names(nc[['var']])) 
-         .self$BB <- raster::as.vector(.self$extent())
+         .self$field("VARS", names(nc[['var']]))
+         .self$field("STEP", .self$step()) 
+         e <- .self$get_extent()
+         .self$BB <- c(e@xmin, e@xmax, e@ymin, e@ymax)
          if ("zlev" %in% names(.self$DIMS)) .self$field("Z", nc[["dim"]][['zlev']][['vals']])
          if ("time" %in% names(.self$DIMS)) .self$field("TIME", nctime_get(nc))
          return(TRUE)
@@ -70,7 +69,7 @@ SPNCRefClass$methods(
          .self$BB[1],.self$BB[2], .self$BB[3], .self$BB[4]),  "\n")
       cat("  VARS:", paste(.self$VARS, collapse = " "), "\n")
       cat("  DIMS:", paste(paste(names(.self$DIMS), .self$DIMS, sep = "="), collapse = " "), "\n")
-      ext <- .self$extent()
+      ext <- .self$get_extent()
       if (!is.null(ext)){
          cat(sprintf("  LON: [ %0.2f, %0.2f]", ext[1], ext[2]), "\n")
          cat(sprintf("  LAT: [ %0.2f, %0.2f]", ext[3], ext[4]), "\n")
@@ -170,7 +169,7 @@ SPNCRefClass$methods(
       # native is assumed to the center
       x <- if ('lon' %in% names(.self$NC$dim)) .self$NC$dim$lon$vals else  NULL
       if (is.null(x)) return(NULL)
-      s <- .self$step()/2
+      s <- .self$STEP/2
       switch(tolower(what[1]),
          'leading' = x + if (s[1] > 0) -s[1] else s[1],
          'trailing' = x + if(s[1] > 0) s[1] else -s[1],
@@ -192,7 +191,7 @@ SPNCRefClass$methods(
       # native is assumed to the center
       y <- if ('lat' %in% names(.self$NC$dim)) .self$NC$dim$lat$vals else NULL
       if (is.null(y)) return(NULL)
-      s <- .self$step()/2
+      s <- .self$STEP/2
       switch(tolower(what[1]),
          'leading' = y + if (s[2] > 0) -s[2] else s[2],
          'trailing' = y + if (s[2] > 0) s[2] else -s[2], 
@@ -224,12 +223,12 @@ SPNCRefClass$methods(
 
 #' Compute extent given a bounding box
 #' 
-#' @name SPNCRefClass_extent
+#' @name SPNCRefClass_get_extent
 #' @param bb the bounding box needed, if missing the current one is used
 #' @return a raster::Extent object
 NULL
 SPNCRefClass$methods(
-   extent = function(bb){
+   get_extent = function(bb){
       if (missing(bb)){
          nx <- .self$DIMS[['lon']]
          ny <- .self$DIMS[['lat']]
@@ -244,7 +243,7 @@ SPNCRefClass$methods(
       iy <- find_interval(bb[3:4], llat)
       iy[ix < 1] <- 1
       
-      s <- .self$step()
+      s <- .self$STEP
       xx <- llon[ix] + if (s[1] < 0) c(s[1],0) else c(0, s[1])
       yy <- llat[iy] + if (s[2] < 0) c(s[2],0) else c(0, s[2])       
       raster::extent(c(range(xx), range(yy)) )
@@ -316,7 +315,7 @@ SPNCRefClass$methods(
       if (is.null(bb)){
          return(
             list(start = c(1,1), count = c(length(llon), length(llat)),
-               bb = .self$extent() ) 
+               bb = .self$get_extent() ) 
             )
       }
       
@@ -328,7 +327,7 @@ SPNCRefClass$methods(
       # make sure they fit within the dims of the data
       ix <- spnc::coerce_within(ix, c(1, length(llon)))
       iy <- spnc::coerce_within(iy, c(1, length(llat)))
-      s <- .self$step()
+      s <- .self$STEP
       xx <- llon[ix] + if (s[1] < 0) c(s[1],0) else c(0, s[1])
       yy <- llat[iy] + if (s[2] < 0) c(s[2],0) else c(0, s[2]) 
       
@@ -375,7 +374,7 @@ SPNCRefClass$methods(
       stopifnot(length(x) == length(y))
       
       # first we get extent, leading cell edges and indices
-      e <- .self$extent()
+      e <- .self$get_extent()
       llon <- .self$lon("leading")
       llat <- .self$lat("leading")   
       ix <- spnc::find_interval(x, llon)

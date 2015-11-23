@@ -46,7 +46,7 @@ MURSSTRefClass$methods(
       stopifnot(length(x) == length(y))
       
       # first we get extent, leading cell edges and indices
-      e <- .self$extent()
+      e <- .self$get_extent()
       llon <- .self$lon("leading")
       llat <- .self$lat("leading")   
       ix <- spnc::find_interval(x, llon)
@@ -133,7 +133,7 @@ MURSST_get_raster <- function(NC, what = 'analysed_sst', layer = 1, bb = NC$BB,
   
       stopifnot(inherits(NC, "MURSSTRefClass"))
       subnav <- NC$subset_bbox(bb)
-      ext <- NC$extent(bb = subnav[['bb']])
+      ext <- NC$get_extent(bb = subnav[['bb']])
       
       if (inherits(layer, "POSIXct") && (length(NC$TIME) > 1) ){
          layer <- findInterval(layer, NC$TIME, all.inside = TRUE)
