@@ -4,13 +4,13 @@
 \alias{SPNC}
 \title{A function to create an SPNCRefClass or subclass reference}
 \usage{
-SPNC(nc, bb = c(-180, 180, -90, 90), nc_verbose = FALSE, n_tries = 3, ...)
+SPNC(nc, bb = NULL, nc_verbose = FALSE, n_tries = 3, ...)
 }
 \arguments{
 \item{nc}{'ncdf4' class object or path to one}
 
 \item{bb}{a 4 element bounding box vector [left, right, bottom, top], defaults
-to [-180, 180, -90, 90]}
+to NULL}
 
 \item{nc_verbose}{logical, passed to ncdf4::nc_open}
 

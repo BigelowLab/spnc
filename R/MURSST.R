@@ -8,6 +8,66 @@ MURSSTRefClass <- setRefClass("MURSSTRefClass",
     contains = "SPNCRefClass")
 
 
+
+#' Compute indicies (start and count) for individual [lon,lat] points
+#' 
+#' @name MURSSTRefClass_subset_points
+#' @param x either a vector of longitude or a 2d matrix [lon,lat] or a data.frame
+#'    with lon,lat columns
+#' @param y numeric vector, if x is a vector, otherwise NULL
+#' @return a list of start/count elements, one per xy input.  For inputs that
+#'    fall beyond the bounds of the data then NA is returned.
+NULL
+MURSSTRefClass$methods(
+   subset_points = function(x, y = NULL, layer = 1){
+   
+      # first verify x and y
+      if (is.null(y)){
+         # this covers list(x=..., y=...) or data.frame(x=...,y=...)
+         if (is.list(x)){
+            if (!all(names(x) %in% c("x", "y"))){
+               stop("if y is NULL, then x must have elements names x and y")
+            } else {
+               y <- x$y
+               x <- x$x
+            }
+         } else if (is.matrix(x)){
+            if (!all(colnames(x) %in% c("x", "y"))){
+               stop("if x is a matrix, then x must have columns named x and y")
+            } else {
+               y <- x[,'y']
+               x <- x[,'x']
+            }
+         } else {
+            stop("if y is NULL, then x must be list, data.frame or matrix with x and y elements")
+         }
+      } # is y provided or NULL
+   
+      stopifnot(length(x) == length(y))
+      
+      # first we get extent, leading cell edges and indices
+      e <- .self$extent()
+      llon <- .self$lon("leading")
+      llat <- .self$lat("leading")   
+      ix <- spnc::find_interval(x, llon)
+      iy <- spnc::find_interval(y, llat)
+      # now convert to list of (start = [ix,iy], count = [nx,ny])
+      # because we have points count is always 1
+      iz <- mapply(function(x, y, layer = 1){         
+            list(start = c(x, y, layer), count = c(1,1,1))
+         },
+         ix,iy, layer = layer, SIMPLIFY = FALSE)
+      # now we have to flag any beyond extent as NA
+      # we could use the indices for the leading edge (where ix or iy < 1)
+      # but we would still need to dub around with the trailing edge
+      # so it is just as easy to use the input x and y instead of ix and iy
+      ixna <- (x < e[1]) | (x > e[2])
+      iyna <- (y < e[3]) | (y > e[4])
+      iz[ixna | iyna] <- NA
+      return(iz)
+   }) #subset_points
+   
+   
 #' Get a raster
 #' 
 #' @name MURSSTRefClass_get_raster
@@ -32,6 +92,23 @@ MURSSTRefClass$methods(
    }) # MURSST_get_raster
 
 
+#' Get points
+#' 
+#' @name MURSSTRefClass_get_points
+#' @param x numeric, vector of longitude points or, if y is NULL, a matrix [x,y] 
+#'     or a data.frame or list with x,y elements
+#' @param y numeric vector of lattitude points or NULL  
+#' @param what character one or more variable names or variable indices
+#' @return numeric vector of values
+NULL
+MURSSTRefClass$methods(
+   get_points = function(x, y = NULL, what = .self$VARS[1], layer = 1){
+      
+      if (!all(what %in% .self$VARS))
+         stop("one or more requested variable(s) not in data:", paste(what, collapse = "\n"))
+      MURSST_get_points(.self, x=x, y=y, what=what, layer = layer)
+   }) # L3SMI_get_points
+   
 
 ##### Methods above
 ##### functions below
@@ -54,8 +131,9 @@ MURSST_get_raster <- function(NC, what = 'analysed_sst', layer = 1, bb = NC$BB,
       crs = "+proj=longlat +datum=WGS84", 
       flip = TRUE, time_fmt = "D%Y%j"){
   
-      subnav <- NC$subset_coords(bb, NC$LON, NC$LAT)
-      ext <- raster::extent(subnav[['bb']])
+      stopifnot(inherits(NC, "MURSSTRefClass"))
+      subnav <- NC$subset_bbox(bb)
+      ext <- NC$extent(bb = subnav[['bb']])
       
       if (inherits(layer, "POSIXct") && (length(NC$TIME) > 1) ){
          layer <- findInterval(layer, NC$TIME, all.inside = TRUE)
@@ -69,7 +147,7 @@ MURSST_get_raster <- function(NC, what = 'analysed_sst', layer = 1, bb = NC$BB,
       }
       getOneLayer <- function(layer, NC, subnav, what = names(NC[['var']])[[1]],
          crs = "+proj=longlat +datum=WGS84"){
-         ncdf4::ncvar_get(NC, what, 
+         ncdf4::ncvar_get(NC, varid = what, 
             start = c(subnav[['start']], layer[1]), 
             count = c(subnav[['count']], 1) )
       }
@@ -96,5 +174,35 @@ MURSST_get_raster <- function(NC, what = 'analysed_sst', layer = 1, bb = NC$BB,
       if (flip) R <-  raster::flip(R,"y")
       return(R)
    }
+
+
+#' Get points for MURSSTRefClass
+#' 
+#' @export
+#' @param NC MURSSTRefClass object
+#' @param x numeric, vector of longitude points or, if y is NULL, a matrix [x,y] 
+#'     or a data.frame or list with x,y elements
+#' @param y numeric vector of lattitude points or NULL
+#' @return numeric vector of values
+MURSST_get_points <- function(NC, x, y = NULL, what = NC$VARS[1], layer = 1){
+   
+   stopifnot(inherits(NC, "MURSSTRefClass"))
+   
+   p <- NC$subset_points(x,y=y, layer = layer)
+      
+      
+   sapply(p, 
+         function(x, nc = null, what = 1){
+            if (!is.list(x) && is.na(x)){
+               r <- NA
+            } else {
+               r <- ncdf4::ncvar_get(nc, what, 
+                  start = x[['start']], 
+                  count = x[['count']] )
+            }
+            r   
+         },
+         nc = NC$NC, what = what[1])
+}
 
 

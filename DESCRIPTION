@@ -15,12 +15,8 @@ Author: Ben Tupper <btupper@bigelow.org>
 License: GPL (>= 2)
 Collate:
     'SPNC.R'
-    'HMODISL3SMI.R'
     'L3SMI.R'
-    'MODISL3SMI.R'
     'MURSST.R'
-    'NHSCE.R'
-    'OISST.R'
     'SPNC-package.R'
     'misc.R'
     'nc.R'

@@ -1,5 +1,8 @@
 # L3SMI.R
 
+
+
+
 #' A subclass of SPNCRefClass for OBPG L3 Standard Mapped Image
 #' 
 #' @include SPNC.R
@@ -9,13 +12,28 @@ L3SMIRefClass <- setRefClass("L3SMIRefClass",
     methods = list(
       init = function(...){
          callSuper(...)
-         #if (.self$is_local()) {
             atts <- .self$get_global_atts()
             nm <- strsplit(atts[['product_name']], ".", fixed = TRUE)[[1]][1]
-            .self$TIME <- as.POSIXct(nm, format = "A%Y%j", tz = "UTC") 
-         #}   
+            .self$TIME <- as.POSIXct(nm, format = "A%Y%j", tz = "UTC")   
       })
    )
+
+
+
+#' Get the step size (resolution) as reported in the global attributes.
+#'
+#' @name L3SMIRefClass_step
+#' @return two element numeric vector of step size in x and y or NULL.
+#' These may be signed for descending values of lon and or lat
+NULL
+L3SMIRefClass$methods(
+   step = function(){
+      atts <- .self$get_global_atts()
+      lat <- .self$lat()
+      onelat <- if (lat[2]-lat[1] > 0) ? 1 else -1
+      c(atts[['longitude_step']], one*atts[['latitude_step']])
+   })
+   
    
 #' Get a raster
 #' 
@@ -42,12 +60,30 @@ L3SMIRefClass$methods(
    }) # L3SMI_get_raster
 
    
+#' Get points
+#' 
+#' @name L3SMIRefClass_get_points
+#' @param x numeric, vector of longitude points or, if y is NULL, a matrix [x,y] 
+#'     or a data.frame or list with x,y elements
+#' @param y numeric vector of lattitude points or NULL  
+#' @param what character one or more variable names or variable indices
+#' @return numeric vector of values
+NULL
+L3SMIRefClass$methods(
+   get_points = function(x, y = NULL, what = .self$VARS[1]){
+      
+      if (!all(what %in% .self$VARS))
+         stop("one or more requested variable(s) not in data:", paste(what, collapse = "\n"))
+      L3SMI_get_points(.self, x=x, y=y, what=what)
+   }) # L3SMI_get_points
+
 ##### methods above
 ##### functions below
 
 
 #' Get a raster for L3SMIRefClass
 #' 
+#' @export
 #' @param NC L3SMIRefClass object
 #' @param what character one or more variable names or variable indices
 #' @param layer numeric vector either a 1-based indices or POSIXct timestamps
@@ -61,9 +97,8 @@ L3SMI_get_raster <- function(NC, what = NC$VARS[1], layer = 1,bb = NC$BB,
       crs = "+proj=longlat +datum=WGS84", flip = FALSE, time_fmt = "D%Y%j"){
    
    stopifnot(inherits(NC, "L3SMIRefClass"))
-   
-   subnav <- NC$subset_coords(bb, lon=NC$LON, lat=NC$LAT)
-   ext <- raster::extent(subnav[['bb']])
+   subnav <- NC$subset_bbox(bb)
+   ext <- NC$extent(bb = subnav[['bb']])
    
    R <- raster::raster(nrow = subnav[['count']][2], 
       ncol = subnav[['count']][1],  ext = ext, crs = crs) 
@@ -114,3 +149,34 @@ L3SMI_get_raster <- function(NC, what = NC$VARS[1], layer = 1,bb = NC$BB,
    
    return(R)
 }
+
+
+
+#' Get points for L3SMIRefClass
+#' 
+#' @export
+#' @param NC L3SMIRefClass object
+#' @param x numeric, vector of longitude points or, if y is NULL, a matrix [x,y] 
+#'     or a data.frame or list with x,y elements
+#' @param y numeric vector of lattitude points or NULL
+#' @return numeric vector of values
+L3SMI_get_points <- function(NC, x, y = NULL, what = NC$VARS[1]){
+   
+   stopifnot(inherits(NC, "L3SMIRefClass"))
+   
+   p <- spnc::subset_points(x,y=y,lon=NC$lon("leading"), lat=NC$lat("leading"))
+   
+   sapply(p, 
+         function(x, nc = null, what = 1){
+            if (!is.list(x) && is.na(x)){
+               r <- NA
+            } else {
+               r <- ncdf4::ncvar_get(nc, what, 
+                  start = x[['start']], 
+                  count = x[['count']] )
+            }
+            r   
+         },
+         nc = NC$NC, what = what[1])
+}
+

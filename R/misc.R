@@ -18,7 +18,8 @@ spnc_flavor <- function(x){
       OISST = 'Daily-OI-V2, Final, Data (Ship, Buoy, AVHRR: NOAA19, METOP, NCEP-ice)',
       MODISL3SMI = 'MODIS Level-3 Standard Mapped Image',
       HMODISL3SMI = 'HMODISA Level-3 Standard Mapped Image',
-      MURSST = 'Multi-scale Ultra-high Resolution (MUR) SST analysis',
+      #MURSST = 'Multi-scale Ultra-high Resolution (MUR) SST analysis',
+      MURSST = 'MUR',
       VIIRS = 'VIIRS Level-3 Standard Mapped Image',
       L3SMI = 'Level-3 Standard Mapped Image',
       NHSCE = "Climate Data Record (CDR) of Northern Hemisphere (NH) Snow Cover Extent (SCE) (CDR Name: Snow_Cover_Extent_NH_IMS_Robinson)"
@@ -89,6 +90,103 @@ to180 <- function(x) {ix <- x > 180 ; x[ix] <- x[ix]-360; x}
 #' @return numeric vector
 to360 <- function(x) {ix <- x < 0 ; x[ix] <- x[ix]+ 360; x}
 
+
+#' A wrapper around base::findInterval() that allows decreasing values in the 
+#' value of the vector within which we wish to place values of x.
+#'
+#' When \code{vec} is in ascending order we use \code{base::findInterval()}, but
+#' when \code{vec} is in descending order we implement an adaptation of the 
+#' \code{locate()} function from Numerical Recipes for C \url{http://apps.nrbook.com/c/index.html}
+#' 
+#' @export
+#' @param x numeric values we wish to located within \code{vec}
+#' @param vec numeric vector of sorted values (ascending or descending order) 
+#'    within which we wish to find the placement of \code{x}
+#' @param rightmost.closed see \link{findInterval}
+#' @param all.inside see \link{findInterval}
+#' @return see \link{findInterval}
+find_interval <- function(x, vec, rightmost.closed = FALSE, all.inside = FALSE){
+
+   # locate one value of x within v
+   # @param v ordered numeric vector
+   # @param x one numeric lo locate within v
+   # @return index into v
+   locate_one <- function(v, x){
+      n <- length(v)
+      ascnd <- v[n] >= v[1]
+      iL <- 1
+	   iU <- n
+      while((iU-iL) > 1){
+         iM <- bitwShiftR((iU+iL),1)
+         if (ascnd){
+            if (x >= v[iM]){
+               iL <- iM
+            } else {
+               iU <- iM
+            }
+         } else {
+            if (x <= v[iM]){
+               iL <- iM
+            } else {
+               iU <- iM
+            }
+         } 
+      }
+      
+      if (ascnd) {
+			if ( val < v[1]) {
+				index <- 0
+			} else if (x >= v[n]) {
+				index <- n
+			} else {
+				index <- iL
+			}
+		} else {
+			if ( x > v[1]) {
+				index <- 0
+			} else if (x <= vec[n]) {
+				index <- n
+			} else {
+				index <- iL
+			}
+		}
+		return(index)
+	}  # locate_one
+
+   ascending <- vec[length(vec)] >= vec[1]
+   
+   if (!ascending) {
+      # here we do our own implementation (with a performance hit)
+      j <- sapply(x, function(x, v=NULL) locate_one(v,x), v = vec)   
+      nv <- length(vec)
+      if (all.inside){
+         j[j < 1] <- 1
+         j[j >= nv] <- nv - 1
+      } 
+      if (rightmost.closed){
+         j[x <= vec[nv]] <- nv - 1
+      }
+   } else {
+      # this is plain vanilla stuff we pass to findInterval
+      j <- base::findInterval(x, vec, 
+         rightmost.closed = rightmost.closed, all.inside = all.inside)
+   }
+   j
+}  # find_interval
+
+#' Coerce values of x two be within the range of the bounds b.
+#' 
+#' @export
+#' @param x numeric vector
+#' @param b two element numeric vector of [min,max] defining bounds
+#' @return a numeric vector same length as x with all values within bounds b
+coerce_within <- function(x, b = c(0.0, 1.0)){
+   x[x < b[1]] <- b[1]
+   x[x > b[2]] <- b[2]
+   x
+} 
+
+
 #' Craft subset indices into a ncdf array
 #'
 #' @export
@@ -124,6 +222,115 @@ subset_nav <- function(bb = NULL, lon = c(-180,180), lat = c(-90,90)){
       count = c(ix[2]-ix[1]+1, iy[2]-iy[1]+1),
       bb = newbb  )
 }
+
+
+#' Craft subset indices into a ncdf array
+#'
+#' @export
+#' @seealso \url{http://r.789695.n4.nabble.com/Lat-Lon-NetCDF-subset-td3394326.html}
+#' @param bb numeric, four element bounding box [left, right, bottom, top]
+#' @param lon numeric vector of lons to select from - these come from the LON attribute in nc
+#' @param lat numeric vector of lats to select from - these come from the LAT attribute in nc
+#' @return a list of \code{start} indices in x and y, \code{counts} in x and y and
+#'    a possibly updated copy of \code{bb} vector of [left, right, bottom, top]
+subset_bbox <- function(bb = NULL, lon = c(-180,180), lat = c(-90,90)){
+   if (is.null(bb)){
+      return( list(start = c(1,1), count = c(length(lon), length(lat)),
+         bb = c( range(lon), range(lat) ) ) )
+   }
+   
+   # when data is stored north to south
+   #yDescends <- (lat[2] - lat[1]) < 0
+   
+  
+   
+   # # when we pop out of this structure we need iy to be the indices of [start,stop]
+   # # into LAT (thus the indices into the NC data   
+   # if (yDescends){
+   #    iy <- which(findInterval(lat, bb[3:4], rightmost.closed = TRUE) == 1)
+   #    iy <- range(iy)
+   # } else {
+   #    iy <- findInterval(bb[3:4], lat, all.inside = TRUE)
+   # }
+   
+   ix <- find_interval(bb[0:2], lon)
+   iy <- find_interval(bb[3:4], lat)
+   # get these in order
+   ix <- range(ix)
+   iy <- range(iy)
+   # make sure they fit within the dims of the data
+   ix <- coerce_within(ix, c(1, length(lon)))
+   iy <- coerce_within(iy, c(1, length(lat)))
+   
+   newbb <- c(range(lon[ix]), range(lat[iy]))
+   list(start = c(ix[1], iy[1]), 
+      count = c(ix[2]-ix[1]+1, iy[2]-iy[1]+1),
+      bb = newbb  )
+}
+
+
+#' Converts Lon/Lat to start and count suitable for extracting points
+#'
+#' @export
+#' @param x either a vector of longitude or a 2d array [lon,lat] or a data.frame
+#' with lon,lat columns
+#' @param y numeric vector, if x is a vector, otherwise NULL
+#' @param lon numeric vector of lons to select from - these come from the LON attribute in nc
+#' @param lat numeric vector of lats to select from - these come from the LAT attribute in nc
+#' @return a list of start/count elements, one per xy input.  For inputs that
+#'    fall beyond the bounds of the data then NA is returned.
+subset_points <- function(x, y = NULL, lon = c(-180,180), lat = c(-90, 90)){
+   
+   if (is.null(y)){
+      # this covers list(x=..., y=...) or data.frame(x=...,y=...)
+      if (is.list(x)){
+         if (!all(names(x) %in% c("x", "y"))){
+            stop("if y is NULL, then x must have elements names x and y")
+         } else {
+            y <- x$y
+            x <- x$x
+         }
+      } else if (is.matrix(x)){
+         if (!all(colnames(x) %in% c("x", "y"))){
+            stop("if x is a matrix, then x must have columns named x and y")
+         } else {
+            y <- x[,'y']
+            x <- x[,'x']
+         }
+      } else {
+         stop("if y is NULL, then x must be list, data.frame or matrix with x and y elements")
+      }
+   }
+   
+            
+   # when data is stored north to south
+   yDescends <- (lat[2] - lat[1]) < 0
+   
+   dx <- lon[2] - lon[1]
+   dy <- abs(lat[1]-lat[2])
+   
+   ix <- find_interval(x, lon)
+   ix[ix < 1] <- 1
+
+   iy <- find_interval(y, lat)
+   iy[iy < 1] <- 1 
+   
+   iz <- mapply(function(x, y){
+         list(start = c(x,y), count = c(1,1))
+      },
+      ix,iy, SIMPLIFY = FALSE)
+   
+   ix <- (x < lon[1]) | (x > (lon[length(lon)] + dx))
+   iy <- if (yDescends){
+         (y > lat[1]) | (y < (lat[length(lat)] - dy))
+      } else {
+         (y < lat[1]) | (y > (lat[length(lat)] + dy))
+      } 
+   iz[ix | iy] <- NA
+   iz
+} # subset_points
+
+
 
 
 #' Extract a matrix of data from a SPNCRefClass of raster flavor

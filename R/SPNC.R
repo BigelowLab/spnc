@@ -17,8 +17,8 @@ SPNCRefClass <- setRefClass("SPNCRefClass",
       BB = 'numeric',      # the 4 element bounding box
       DIMS = 'numeric',    # the dimensions
       VARS = 'character',  # the variable names
-      LON = "ANY",         # possibly a vector of lons
-      LAT = "ANY",         # possibly a vector of lats
+      #LON = "ANY",         # possibly a vector of lons
+      #LAT = "ANY",         # possibly a vector of lats
       Z = "ANY",           # possibly a vector of z-values
       TIME = 'ANY'),       # possibly a vector of times
    methods = list(
@@ -30,8 +30,8 @@ SPNCRefClass <- setRefClass("SPNCRefClass",
          .self$field("BB",  c(-180, 180, -90, 90))
          .self$field("DIMS", numeric())
          .self$field("VARS", character())
-         .self$field("LON", NULL)
-         .self$field("LAT", NULL)
+         #.self$field("LON", NULL)
+         #.self$field("LAT", NULL)
          .self$field("Z", NULL)
          .self$field("TIME", NULL)
          
@@ -48,8 +48,7 @@ SPNCRefClass <- setRefClass("SPNCRefClass",
       init = function(nc){
          .self$field("DIMS", ncdim_get(nc))
          .self$field("VARS", names(nc[['var']])) 
-         if ("lon" %in% names(.self$DIMS)) .self$field("LON", nc[["dim"]][['lon']][['vals']])
-         if ("lat" %in% names(.self$DIMS)) .self$field("LAT", nc[["dim"]][['lat']][['vals']])
+         .self$BB <- raster::as.vector(.self$extent())
          if ("zlev" %in% names(.self$DIMS)) .self$field("Z", nc[["dim"]][['zlev']][['vals']])
          if ("time" %in% names(.self$DIMS)) .self$field("TIME", nctime_get(nc))
          return(TRUE)
@@ -67,13 +66,15 @@ SPNCRefClass$methods(
       
       cat("  flavor:", paste(names(.self$flavor), .self$flavor, sep = "=", collapse = " "), "\n") 
       cat("  state:", state, "\n")
-      cat("  bounding box:", paste(.self$BB, collapse = " "), "\n")
+      cat("  bounding box:", sprintf("%0.4f %0.4f %0.4f %0.4f", 
+         .self$BB[1],.self$BB[2], .self$BB[3], .self$BB[4]),  "\n")
       cat("  VARS:", paste(.self$VARS, collapse = " "), "\n")
       cat("  DIMS:", paste(paste(names(.self$DIMS), .self$DIMS, sep = "="), collapse = " "), "\n")
-      if (!is.null(.self$LON))
-         cat(sprintf("  LON: [ %f, %f]", .self$LON[1], .self$LON[.self$DIMS[['lon']]]), "\n")
-      if (!is.null(.self$LAT))
-         cat(sprintf("  LAT: [ %f, %f]", .self$LAT[1], .self$LAT[.self$DIMS[['lat']]]), "\n")
+      ext <- .self$extent()
+      if (!is.null(ext)){
+         cat(sprintf("  LON: [ %0.2f, %0.2f]", ext[1], ext[2]), "\n")
+         cat(sprintf("  LAT: [ %0.2f, %0.2f]", ext[3], ext[4]), "\n")
+      }
       if (!is.null(.self$Z))
          cat(sprintf("  Z: [ %f, %f]", .self$Z[1], .self$Z[.self$DIMS[['zlev']]]), "\n")
        if (!is.null(.self$TIME))
@@ -153,6 +154,102 @@ SPNCRefClass$methods(
    }) # close
 
 
+#' Get the longitude locations
+#'
+#' @name SPNCRefClass_lon
+#' @param what the desired location - 'leading', 'trailing', 'center' or 'native' (default)
+#' Values 'trailing' and 'leading' are about the direction lon/lat are stored.  For example,
+#' if lon/lat are each stored in ascending order then the leading edge is bottom and left. 
+#' On the other hand, is lon descends (east-to-west) then the leading edge is
+#' bottom and right.  Values 'native and 'center' are assumed the same - if that
+#' is not a correct for a class, then a method override is required
+#' @return numeric vector or NULL
+NULL
+SPNCRefClass$methods(
+   lon = function(what = c('native', 'leading', 'trailing', 'center')[1]){
+      # native is assumed to the center
+      x <- if ('lon' %in% names(.self$NC$dim)) .self$NC$dim$lon$vals else  NULL
+      if (is.null(x)) return(NULL)
+      s <- .self$step()/2
+      switch(tolower(what[1]),
+         'leading' = x + if (s[1] > 0) -s[1] else s[1],
+         'trailing' = x + if(s[1] > 0) s[1] else -s[1],
+         x)
+   })
+
+#' Get the latitude locations
+#'
+#' @name SPNCRefClass_lat
+#' @param what the desired location -  'leading', 'trailing', 'center' or 'native' (default)
+#' Values 'trailing' and 'leading' are about the direction lon/lat are stored.  For example,
+#' if lon/lat are each stored in ascending order then the leading edge is bottom and left. 
+#' On the other hand, is lat descends (north-to-south) then the leading edge is
+#' top and left.  Values 'native and 'center' are likely the same.
+#' @return numeric vector or NULL
+NULL
+SPNCRefClass$methods(
+   lat = function(what = c('native', 'leading', 'trailing', 'center')[1]){
+      # native is assumed to the center
+      y <- if ('lat' %in% names(.self$NC$dim)) .self$NC$dim$lat$vals else NULL
+      if (is.null(y)) return(NULL)
+      s <- .self$step()/2
+      switch(tolower(what[1]),
+         'leading' = y + if (s[2] > 0) -s[2] else s[2],
+         'trailing' = y + if (s[2] > 0) s[2] else -s[2], 
+         y)
+   })
+
+#' Get the step size (resolution) as a guess - the space between the first 
+#' on and lat values.  Subclasses with unambiguous steps sizes, like L3SMI and  
+#' MURSST, should override this method.
+#'
+#' @name SPNCRefClass_step
+#' @return two element numeric vector of step size in x and y or NULL
+#' These may be signed for descending values of lon and or lat
+NULL
+SPNCRefClass$methods(
+   step = function(){
+      x <- NULL
+      y <- NULL
+      if (all(c('lat','lon') %in% names(.self$NC$dim))){
+            xr <- range(.self$NC$dim$lon$vals)
+            d <- .self$get_dims()
+            x <- (xr[2]-xr[1])/d[['lon']]
+            yr <- range(.self$NC$dim$lat$vals)
+            y <- (yr[2]-yr[1])/d[['lat']]
+      }
+      if (is.null(x) || is.null(y)) return(NULL)
+      c(x, y)
+   })
+
+#' Compute extent given a bounding box
+#' 
+#' @name SPNCRefClass_extent
+#' @param bb the bounding box needed, if missing the current one is used
+#' @return a raster::Extent object
+NULL
+SPNCRefClass$methods(
+   extent = function(bb){
+      if (missing(bb)){
+         nx <- .self$DIMS[['lon']]
+         ny <- .self$DIMS[['lat']]
+         bb <- c(range(.self$lon()[c(1,nx)]), range(.self$lat()[c(1,ny)]))
+      }
+      if (identical(bb, .self$BB)) return(raster::extent(.self$BB))
+      
+      llon <- .self$lon("leading")
+      llat <- .self$lat("leading")
+      ix <- find_interval(bb[1:2], llon)
+      ix[ix < 1] <- 1
+      iy <- find_interval(bb[3:4], llat)
+      iy[ix < 1] <- 1
+      
+      s <- .self$step()
+      xx <- llon[ix] + if (s[1] < 0) c(s[1],0) else c(0, s[1])
+      yy <- llat[iy] + if (s[2] < 0) c(s[2],0) else c(0, s[2])       
+      raster::extent(c(range(xx), range(yy)) )
+   })
+
 #' Get global attributes
 #'
 #' @name SPNCRefClass_get_global_atts
@@ -161,8 +258,6 @@ SPNCRefClass$methods(
 NULL
 SPNCRefClass$methods(
    get_global_atts = function(...){
-      #d <- if (!is.null(.self$NC)) ncdf4::ncatt_get(.self$NC, varid = 0) else NULL
-      #if (!is.null(d)) names(d) <- gsub("NC_GLOBAL.", "", names(d), fixed = TRUE)
       return(ncglobal_atts(.self$NC, ...))
    })
    
@@ -189,6 +284,7 @@ SPNCRefClass$methods(
       return(d)
    })
 
+
 #' Retrieve the subset coordinates 
 #' 
 #' @name SPNCRefClass_subset_coords
@@ -198,10 +294,105 @@ SPNCRefClass$methods(
 #'    a possibly updated copy of \code{bb} vector of [left, right, bottom, top]
 NULL
 SPNCRefClass$methods(
-   subset_coords = function(bb = .self$BB, lon = .self$LON, lat = .self$LAT){
+   subset_coords = function(bb = .self$BB, lon = .self$lon("leading"), 
+      lat = .self$lat("leading")){
       subset_nav(bb=bb,lon=lon,lat=lat)  
    })
 
+
+#' Craft subset indices into a ncdf array
+#'
+#' @name SPNCRefClass_subset_bbox
+#'
+#' @seealso \url{http://r.789695.n4.nabble.com/Lat-Lon-NetCDF-subset-td3394326.html}
+#' @param bb numeric, four element bounding box [left, right, bottom, top]
+#' @return a list of \code{start} indices in x and y, \code{counts} in x and y and
+#'    a possibly updated copy of \code{bb} vector of [left, right, bottom, top]
+NULL
+SPNCRefClass$methods(
+   subset_bbox = function(bb = NULL){
+      llon <- .self$lon("leading")
+      llat <- .self$lat("leading")
+      if (is.null(bb)){
+         return(
+            list(start = c(1,1), count = c(length(llon), length(llat)),
+               bb = .self$extent() ) 
+            )
+      }
+      
+      ix <- spnc::find_interval(bb[0:2], llon)
+      iy <- spnc::find_interval(bb[3:4], llat)
+      # get these in order
+      ix <- range(ix)
+      iy <- range(iy)
+      # make sure they fit within the dims of the data
+      ix <- spnc::coerce_within(ix, c(1, length(llon)))
+      iy <- spnc::coerce_within(iy, c(1, length(llat)))
+      s <- .self$step()
+      xx <- llon[ix] + if (s[1] < 0) c(s[1],0) else c(0, s[1])
+      yy <- llat[iy] + if (s[2] < 0) c(s[2],0) else c(0, s[2]) 
+      
+      list(start = c(ix[1], iy[1]), 
+         count = c(ix[2]-ix[1]+1, iy[2]-iy[1]+1),
+         bb = c(range(xx), range(yy)) )
+   }) # subset_bbox
+   
+
+#' Compute indicies (start and count) for individual [lon,lat] points
+#' 
+#' @name SPNCRefClass_subset_points
+#' @param x either a vector of longitude or a 2d matrix [lon,lat] or a data.frame
+#'    with lon,lat columns
+#' @param y numeric vector, if x is a vector, otherwise NULL
+#' @return a list of start/count elements, one per xy input.  For inputs that
+#'    fall beyond the bounds of the data then NA is returned.
+NULL
+SPNCRefClass$methods(
+   subset_points = function(x, y = NULL){
+   
+      # first verify x and y
+      if (is.null(y)){
+         # this covers list(x=..., y=...) or data.frame(x=...,y=...)
+         if (is.list(x)){
+            if (!all(names(x) %in% c("x", "y"))){
+               stop("if y is NULL, then x must have elements names x and y")
+            } else {
+               y <- x$y
+               x <- x$x
+            }
+         } else if (is.matrix(x)){
+            if (!all(colnames(x) %in% c("x", "y"))){
+               stop("if x is a matrix, then x must have columns named x and y")
+            } else {
+               y <- x[,'y']
+               x <- x[,'x']
+            }
+         } else {
+            stop("if y is NULL, then x must be list, data.frame or matrix with x and y elements")
+         }
+      } # is y provided or NULL
+   
+      stopifnot(length(x) == length(y))
+      
+      # first we get extent, leading cell edges and indices
+      e <- .self$extent()
+      llon <- .self$lon("leading")
+      llat <- .self$lat("leading")   
+      ix <- spnc::find_interval(x, llon)
+      iy <- spnc::find_interval(y, llat)
+      # now convert to list of (start = [ix,iy], count = [nx,ny])
+      # because we have points count is always 1
+      iz <- mapply(function(x, y){list(start = c(x,y), count = c(1,1))},
+         ix,iy, SIMPLIFY = FALSE)
+      # now we have to flag any beyond extent as NA
+      # we could use the indices for the leading edge (where ix or iy < 1)
+      # but we would still need to dub around with the trailing edge
+      # so it is just as easy to use the input x and y instead of ix and iy
+      ixna <- (x < e[1]) | (x > e[2])
+      iyna <- (y < e[3]) | (y > e[4])
+      iz[ixna | iyna] <- NA
+      return(iz)
+   }) #subset_points
 
 
 #' Get point data
@@ -269,13 +460,13 @@ SPNCRefClass$methods(
 #' @export
 #' @param nc 'ncdf4' class object or path to one
 #' @param bb a 4 element bounding box vector [left, right, bottom, top], defaults
-#'    to [-180, 180, -90, 90]
+#'    to NULL
 #' @param nc_verbose logical, passed to ncdf4::nc_open
 #' @param n_tries numeric, when nc is a path we try to open upt to n_tries before failing
 #'    This helps accomodate occasional network/server issues.
 #' @param ... futher arguments
 #' @return a SPNCRefClass object or subclass or NULL
-SPNC <- function(nc, bb = c(-180, 180, -90, 90), nc_verbose = FALSE, n_tries = 3, ...){
+SPNC <- function(nc, bb = NULL, nc_verbose = FALSE, n_tries = 3, ...){
    
    # if (grepl("windows", .Platform$OS.type, fixed = TRUE)){
    #    cat("Windows platform detected\n")
