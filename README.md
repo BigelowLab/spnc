@@ -88,9 +88,13 @@ JPL's PO.DAAC provides this data as an NCML (filename.ncml) - an XML file that t
 
 Currently this will access (a) locally downloaded files and (b) OpeNDAP files for a single time (dailies).  Access to the aggregate NCML OpeNDAP resources is still under development. Note that longitude is stored in the 0-360 format which requires some juggling internally.  You can still specify bounding boxes in [-180, 180] longitude form.  Here we access the same data two ways... 
 
-+ (a) download and unpack this [file](ftp://eclipse.ncdc.noaa.gov/pub/OI-daily-v2/NetCDF/2004/AVHRR-AMSR/amsr-avhrr-v2.20040101.nc.gz)
++ (a) download and unpack this file 
 
-+ (b) connect via OpeNDAP to this [resource]('http://www.ncdc.noaa.gov/thredds/dodsC/oisst/NetCDF/AVHRR-AMSR/2004/AVHRR-AMSR/amsr-avhrr-v2.20040101.nc') 
+ftp://eclipse.ncdc.noaa.gov/pub/OI-daily-v2/NetCDF/2004/AVHRR-AMSR/amsr-avhrr-v2.20040101.nc.gz
+
++ (b) connect via OpeNDAP to this resource 
+
+http://www.ncdc.noaa.gov/thredds/dodsC/oisst/NetCDF/AVHRR-AMSR/2004/AVHRR-AMSR/amsr-avhrr-v2.20040101.nc
 
 ... and visually compare the two (which are the same!)
 
