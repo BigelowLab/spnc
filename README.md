@@ -86,11 +86,33 @@ JPL's PO.DAAC provides this data as an NCML (filename.ncml) - an XML file that t
 
 + `OISST` [NOAA Optimum Interpolation (OI) Sea Surface Temperature ](http://www.esrl.noaa.gov/psd/data/gridded/data.noaa.oisst.v2.html)
 
-Under development.
+Currently this will access (a) locally downloaded files and (b) OpeNDAP files for a single time (dailies).  Access to the aggregate NCML OpeNDAP resources is still under development. Note that longitude is stored in the 0-360 format which requires some juggling internally.  You can still specify bounding boxes in [-180, 180] longitude form.  Here we access the same data two ways... 
+
++ (a) download and unpack this [file](ftp://eclipse.ncdc.noaa.gov/pub/OI-daily-v2/NetCDF/2004/AVHRR-AMSR/amsr-avhrr-v2.20040101.nc.gz)
+
++ (b) connect via OpeNDAP to this [resource]('http://www.ncdc.noaa.gov/thredds/dodsC/oisst/NetCDF/AVHRR-AMSR/2004/AVHRR-AMSR/amsr-avhrr-v2.20040101.nc') 
+
+... and visually compare the two (which are the same!)
 
 ```R
-OISST_file = 'http://www.ncdc.noaa.gov/thredds/dodsC/OISST-V2-AVHRR_agg'
-OI <- SPNC(OISST_file, bb = bb)
+library(raster)
+library(spnc)
+
+BB <- c(-72,-63,39,46)
+localFile <- '/Users/ben/Downloads/amsr-avhrr-v2.20040101.nc'
+opendapFile <- 'http://www.ncdc.noaa.gov/thredds/dodsC/oisst/NetCDF/AVHRR-AMSR/2004/AVHRR-AMSR/amsr-avhrr-v2.20040101.nc'
+
+X <- SPNC(localFile)
+x <- X$get_raster(what = 'sst', bb = BB)
+
+Y <- SPNC(opendapFile)
+y <- Y$get_raster(what = 'sst', bb = BB)
+
+spplot(stack(x,y))
+
+# not yet for NCML
+# OISST_file = 'http://www.ncdc.noaa.gov/thredds/dodsC/OISST-V2-AVHRR_agg'
+# OI <- SPNC(OISST_file, bb = bb)
 ```
 
 + `NHSCE` [Northern Hemisphere Snow Cover Extent](https://climatedataguide.ucar.edu/climate-data/snow-cover-extent-northern-hemisphere-climate-data-record-rutgers) 

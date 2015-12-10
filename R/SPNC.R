@@ -232,6 +232,7 @@ SPNCRefClass$methods(
       if (missing(bb)){
          nx <- .self$DIMS[['lon']]
          ny <- .self$DIMS[['lat']]
+         s <- .self$step()
          bb <- c(range(.self$lon()[c(1,nx)]), range(.self$lat()[c(1,ny)]))
       }
       if (identical(bb, .self$BB)) return(raster::extent(.self$BB))
@@ -299,6 +300,24 @@ SPNCRefClass$methods(
    })
 
 
+#' Order a subset coordinate system into the order matching that stored in
+#' the ncdf file.  For ncdf4 the order should be X,Y,Z,T (which might be 
+#' lon, lat, zlev, time, but not necessarily those names).  Honestly, this
+#' probably should not even be a method - but use at your own risk/pain.
+#'
+#' @name SPNCRefClass_order_subset
+#' @param s a subset list comprised of at least start and count
+#' @return the same list with elements of start and count properly ordered
+NULL
+SPNCRefClass$methods(
+   order_subset = function(s){
+     stopifnot(all(c("start", "count") %in% names(s)))
+     vnames <- names(.self$NC$dim)
+     s[['start']] <- s[['start']][vnames]
+     s[['count']] <- s[['count']][vnames]
+     return(s)
+   })
+
 #' Craft subset indices into a ncdf array
 #'
 #' @name SPNCRefClass_subset_bbox
@@ -314,7 +333,7 @@ SPNCRefClass$methods(
       llat <- .self$lat("leading")
       if (is.null(bb)){
          return(
-            list(start = c(1,1), count = c(length(llon), length(llat)),
+            list(start = c(lon=1,lat=1), count = c(lon=length(llon), lat=length(llat)),
                bb = .self$get_extent() ) 
             )
       }
@@ -331,8 +350,8 @@ SPNCRefClass$methods(
       xx <- llon[ix] + if (s[1] < 0) c(s[1],0) else c(0, s[1])
       yy <- llat[iy] + if (s[2] < 0) c(s[2],0) else c(0, s[2]) 
       
-      list(start = c(ix[1], iy[1]), 
-         count = c(ix[2]-ix[1]+1, iy[2]-iy[1]+1),
+      list(start = c(lon=ix[1], lat=iy[1]), 
+         count = c(lon=ix[2]-ix[1]+1, lat=iy[2]-iy[1]+1),
          bb = c(range(xx), range(yy)) )
    }) # subset_bbox
    
@@ -381,7 +400,7 @@ SPNCRefClass$methods(
       iy <- spnc::find_interval(y, llat)
       # now convert to list of (start = [ix,iy], count = [nx,ny])
       # because we have points count is always 1
-      iz <- mapply(function(x, y){list(start = c(x,y), count = c(1,1))},
+      iz <- mapply(function(x, y){list(start = c(lon=x,lat=y), count = c(lon=1,lat=1))},
          ix,iy, SIMPLIFY = FALSE)
       # now we have to flag any beyond extent as NA
       # we could use the indices for the leading edge (where ix or iy < 1)
@@ -503,7 +522,7 @@ SPNC <- function(nc, bb = NULL, nc_verbose = FALSE, n_tries = 3, ...){
       'oisst' = OISSTRefClass$new(nc, bb = bb, ...),
       'mursst' = MURSSTRefClass$new(nc, bb = bb, ...),
       'modisl3smi' = MODISL3SMIRefClass$new(nc, bb = bb, ...),
-      'hmodisl3smi' = HMODISL3SMIRefClass$new(nc, bb = bb, ...),
+      'hmodisl3smi' = SPNCRefClass$new(nc, bb = bb, ...),
       'nhsce' = NHSCERefClass$new(nc, bb = bb, ...),
       SPNCRefClass$new(nc, bb = bb, ...))
    

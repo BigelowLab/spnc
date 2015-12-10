@@ -17,6 +17,7 @@ Collate:
     'SPNC.R'
     'L3SMI.R'
     'MURSST.R'
+    'OISST.R'
     'SPNC-package.R'
     'misc.R'
     'nc.R'

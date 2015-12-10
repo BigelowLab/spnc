@@ -15,7 +15,7 @@ spnc_flavor <- function(x){
    flvr <- list(source = "", type = "raster", local = NA)
    filename <- NULL 
    lut = c(
-      OISST = 'Daily-OI-V2, Final, Data (Ship, Buoy, AVHRR: NOAA19, METOP, NCEP-ice)',
+      OISST = 'Daily-OI-V2, Final, Data',
       MODISL3SMI = 'MODIS Level-3 Standard Mapped Image',
       HMODISL3SMI = 'HMODISA Level-3 Standard Mapped Image',
       #MURSST = 'Multi-scale Ultra-high Resolution (MUR) SST analysis',
@@ -59,7 +59,7 @@ spnc_flavor <- function(x){
          flvr[['source']] <- "HMODISL3SMI"
       } else if (grepl(lut[['L3SMI']], atts[['title']], fixed = TRUE)){
          flvr[['source']] <- "L3SMI"  # OBPG
-      } else if (grepl(lut[['OISST']], atts[['title']], fixed = TRUE)){
+      } else if (grepl(tolower(lut[['OISST']]), tolower(atts[['title']]), fixed = TRUE)){
          flvr[['source']] <- "OISST"
       } else if (grepl(lut[['MODISL3SMI']], atts[['title']], fixed = TRUE)){
          flvr[['source']] <- "MODISL3SMI"
