@@ -103,20 +103,22 @@ library(raster)
 library(spnc)
 
 BB <- c(-72,-63,39,46)
-localFile <- '/Users/ben/Downloads/amsr-avhrr-v2.20040101.nc'
-opendapFile <- 'http://www.ncdc.noaa.gov/thredds/dodsC/oisst/NetCDF/AVHRR-AMSR/2004/AVHRR-AMSR/amsr-avhrr-v2.20040101.nc'
 
+localFile <- '/Users/ben/Downloads/amsr-avhrr-v2.20040101.nc'
 X <- SPNC(localFile)
 x <- X$get_raster(what = 'sst', bb = BB)
 
+opendapFile <- 'http://www.ncdc.noaa.gov/thredds/dodsC/oisst/NetCDF/AVHRR-AMSR/2004/AVHRR-AMSR/amsr-avhrr-v2.20040101.nc'
 Y <- SPNC(opendapFile)
 y <- Y$get_raster(what = 'sst', bb = BB)
-
 spplot(stack(x,y))
 
-# not yet for NCML
-# OISST_file = 'http://www.ncdc.noaa.gov/thredds/dodsC/OISST-V2-AVHRR_agg'
-# OI <- SPNC(OISST_file, bb = bb)
+# for NCML
+mytimes <- seq(from = as.POSIXct("1985-01-10", tz = 'UTC'), to = as.POSIXct("1997-01-01", tz = 'UTC'), by = 'year')
+OISST_file = 'http://www.ncdc.noaa.gov/thredds/dodsC/OISST-V2-AVHRR_agg'
+OI <- SPNC(OISST_file, bb = BB)
+oi <- OI$get_raster(what = 'sst', time = mytimes)
+spplot(oi)
 ```
 
 + `NHSCE` [Northern Hemisphere Snow Cover Extent](https://climatedataguide.ucar.edu/climate-data/snow-cover-extent-northern-hemisphere-climate-data-record-rutgers) 

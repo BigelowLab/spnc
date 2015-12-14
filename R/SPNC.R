@@ -152,7 +152,6 @@ SPNCRefClass$methods(
       return(TRUE)
    }) # close
 
-
 #' Get the longitude locations
 #'
 #' @name SPNCRefClass_lon

@@ -3,12 +3,37 @@
 #' A subclass of SPNCRefClass for NOAA Optimum Interpolation (OI) Sea Surface Temperature \url{http://www.esrl.noaa.gov/psd/data/gridded/data.noaa.oisst.v2.html}
 #' 
 #' Lon and Lat appear to be cell centers with 0.25 x 0.25 degree resolution
-#' Lat is an asceinfing order
+#' Lat is an ascending order [-90, 90] and while Lon in mapped to [0,360] 
+#' bounding box requests follow the [-180,180] form.  Translation is done 
+#' automatically.
 #'
 #' @include SPNC.R
 #' @export
 OISSTRefClass <- setRefClass("OISSTRefClass",
     contains = "SPNCRefClass")
+
+#' Compute time indices (which must be contiguous) from POSIXt, Date or index.
+#' An error is thrown if the dates requested are not contiguous.
+#'
+#' @name OISSTRefClass_time_index
+#'
+#' @param when numeric, POSIXct or Date times
+#' @param no_zero logical, any times requested before the first time are mapped
+#'    to the first time
+#' @return one or more indices 
+NULL
+OISSTRefClass$methods(
+   time_index = function(when = 1, no_zero = TRUE){
+      
+      if (inherits(when, 'POSIXt') || inherits(when, 'Date')) {    
+         ix <- find_interval(when, .self$TIME)
+      } else {
+         ix <- find_interval(when, seq_len(.self$NC[["dim"]][['time']][['len']]))
+      }
+      if (no_zero) ix[ix <= 0] <- 1
+      ix
+   })
+
 
 
 #' Craft subset indices into a ncdf array
@@ -24,6 +49,7 @@ OISSTRefClass <- setRefClass("OISSTRefClass",
 NULL
 OISSTRefClass$methods(
    subset_bbox = function(bb = NULL, zlev = 1, time = 1){
+      
       llon <- .self$lon("leading")
       llat <- .self$lat("leading")
       if (is.null(bb)){
@@ -48,7 +74,12 @@ OISSTRefClass$methods(
             count = c(lon=ix[2]-ix[1]+1, lat=iy[2]-iy[1]+1, zlev=length(zlev), time=length(time)),
             bb = c(range(xx), range(yy)) )
       }
-      #.self$order_subset(s)
+      
+      # not every OISST is made the same - some have zlev and others don't
+      # so we match ouur subnav to the actual dims
+      vnames <- c("lon", "lat", "time")
+      s[['start']] <- s[['start']][vnames]
+      s[['count']] <- s[['count']][vnames]
       s
    }) # subset_bbox
 
@@ -68,25 +99,29 @@ OISSTRefClass$methods(
 
 #' Get a raster
 #' 
+#' Requests can be made for multiple variables at multiple times.  In such cases
+#' it is impotant to know that the order of rasters is each time for each variable
+#' requested.  Thus requesting variables 'v1', 'v2', 'v3' at times t1 and t2
+#' results in a stack with v1-t1, v1-t2, v2-t1, v2-t2, v3-t1, v3-t2 order.
+#'
 #' @name OISSTRefClass_get_raster
 #' @param what character one or more variable names or variable indices
-#' @param layer numeric vector either a 1-based indices or POSIXct timestamps
+#' @param time numeric vector either a 1-based indices or POSIXct timestamps
 #' @param bb a 4 element bounding box vector [left, right, bottom, top], defaults
 #'    to [-180, 180, -90, 90]
 #' @param crs character, the coordiante reference system to apply
 #' @param flip logical if TRUE then flip the raster in the y direction
-#' @param time_fmt if multiple time layers are returned, this controls the layer names
 #' @return a \code{raster::brick} or \code{raster::layer} object or NULL
 NULL
 OISSTRefClass$methods(
-   get_raster = function(what = .self$VARS, layer = 1,bb = .self$BB,
-      crs = "+proj=longlat +datum=WGS84", flip = TRUE, time_fmt = "D%Y%j"){
+   get_raster = function(what = .self$VARS[1], time = 1,bb = .self$BB,
+      crs = "+proj=longlat +datum=WGS84", flip = TRUE){
 
       if (!all(what %in% .self$VARS))
          stop("one or more requested variable(s) not in data:", paste(what, collapse = "\n"))
       
-      R <- OISST_get_raster(.self, what=what, layer = layer, bb = bb,
-         crs = crs, flip = flip, time_fmt = time_fmt)
+      R <- OISST_get_raster(.self, what=what, time = time, bb = bb,
+         crs = crs, flip = flip)
       return(R)
    }) # OISST_get_raster
    
@@ -97,15 +132,14 @@ OISSTRefClass$methods(
 #' @export
 #' @param NC OISSTRefClass object
 #' @param what character one or more variable names or variable indices
-#' @param layer numeric vector either a 1-based indices or POSIXct timestamps
+#' @param time numeric vector either a 1-based indices or POSIXct timestamps
 #' @param bb a 4 element bounding box vector [left, right, bottom, top], defaults
 #'    to [-180, 180, -90, 90]
 #' @param crs character, the coordinate reference system to apply
 #' @param flip logical if TRUE then flip the raster in the y direction
-#' @param time_fmt if multiple time layers are returned, this controls the layer names
 #' @return a \code{raster::brick} or \code{raster::layer} object or NULL
-OISST_get_raster <- function(NC, what = NC$VARS[1], layer = 1,bb = NC$BB,
-      crs = "+proj=longlat +datum=WGS84", flip = TRUE, time_fmt = "D%Y%j"){
+OISST_get_raster <- function(NC, what = NC$VARS[1], time = 1, bb = NC$BB,
+      crs = "+proj=longlat +datum=WGS84", flip = TRUE){
    
    stopifnot(inherits(NC, "OISSTRefClass"))
    subnav <- NC$subset_bbox(bb)
@@ -116,48 +150,32 @@ OISST_get_raster <- function(NC, what = NC$VARS[1], layer = 1,bb = NC$BB,
       ncol = subnav[['count']]['lon'],
       ext = ext,
       crs = crs) 
-     
-   if (NC$flavor[['local']] == TRUE){
       
-      x <- ncdf4::ncvar_get(NC$NC, what[1], 
-            start = subnav[['start']], 
-            count = subnav[['count']] )
-            
-      R <- raster::raster(t(x), template = R)
-      
-   } else {
+   # for each what
+   # if (is_contiguous(time))
+   #    get_block_of_what_when
+   # else  
+   #     for each time get a block
    
-      getOneVar <- function(vname, NC, subnav,
-         crs = "+proj=longlat +datum=WGS84"){
-         ncdf4::ncvar_get(NC, vname, 
-            start = c(subnav[['start']], layer[1]), 
-            count = c(subnav[['count']], 1) )
-      }
-      getOneLayer <- function(layer, NC, subnav, what = names(NC[['var']])[[1]],
-         crs = "+proj=longlat +datum=WGS84"){
-         ncdf4::ncvar_get(NC, what, 
-            start = c(subnav[['start']]), 
-            count = c(subnav[['count']]) )
-      }
-      
-      
-      if (length(what) > 1){   
-         X <- lapply(what, getOneVar, NC$NC, subnav, crs = crs, layer = layer[1] )
-         for (w in names(X)) R <- raster::addLayer(R, 
-            raster::raster(t(X[[w]]), template = R))
-         names(R) <- what
+   tix <- NC$time_index(time)
+   is_contiguous <- all(diff(tix) == 1)
+   for (w in what){
+      if (is_contiguous){
+         snav <- subnav
+         snav[['start']][['time']] <- tix[1]
+         snav[['count']][['time']] <- length(tix)
+         x <- ncdf4::ncvar_get(NC$NC, w, start = c(snav[['start']]), count = c(snav[['count']]) )
+         for(i in seq_len(dim(x)[3])) R <- addLayer(R, raster::raster(t(x[,,i]), template = R))
       } else {
-         X <- lapply(layer, getOneLayer, NC$NC, subnav, crs = crs, what = what[1]) 
-         for (r in X) R <- raster::addLayer(R, 
-            raster::raster(t(r), template = R))
-         if (length(NC$TIME) > 1){
-            names(R) <- format(NC$TIME[layer], time_fmt)
-         } else {
-            names(R) <- paste("layer", layer, sep = "_")
-         } 
-      } # multiple variable?
-   
-   } # local or OpenDAP?
+         for (ix in tix){
+            snav <- subnav
+            snav[['start']][['time']] <- ix
+            snav[['count']][['time']] <- 1
+            x <- ncdf4::ncvar_get(NC$NC, w, start = c(snav[['start']]), count = c(snav[['count']]) )
+            R <- addLayer(R, raster::raster(t(x), template = R))
+         }
+      }
+   }   
    
    if (flip) R <- raster::flip(R,"y")
    
