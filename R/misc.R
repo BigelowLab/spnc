@@ -76,6 +76,24 @@ spnc_flavor <- function(x){
 }
 
 
+#' Convert bounding box [0,360] longitudes to [-180, 180]
+#' 
+#' Bounding boxes are 4 element vectors of [left, right, bottom, top]
+#'
+#' @export
+#' @param x numeric bounding box vector, no check is done for being withing 0,360 range
+#' @return numeric bounding box vector
+to180BB <- function(x) {x[1:2] <- to180(x[1:2]) ; x}
+
+#' Convert [-180,180] bounding box longitudes to [0,360]
+#' 
+#' Bounding boxes are 4 element vectors of [left, right, bottom, top]
+#'
+#' @export
+#' @param x numeric bounding box vector, no check is done for being withing 0,360 range
+#' @return numeric bounding box vector
+to360BB <- function(x) {x[1:2] <- to360(x[1:2]) ; x}
+
 #' Convert [0,360] longitudes to [-180, 180]
 #' 
 #' @export

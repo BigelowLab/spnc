@@ -8,7 +8,6 @@
 \description{
 Lon and Lat appear to be cell centers with 0.25 x 0.25 degree resolution
 Lat is an ascending order [-90, 90] and while Lon in mapped to [0,360]
-bounding box requests follow the [-180,180] form.  Translation is done
-automatically.
+bounding box requests must follow the [0,360] form.
 }
 

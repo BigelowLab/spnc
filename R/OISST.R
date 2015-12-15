@@ -4,8 +4,7 @@
 #' 
 #' Lon and Lat appear to be cell centers with 0.25 x 0.25 degree resolution
 #' Lat is an ascending order [-90, 90] and while Lon in mapped to [0,360] 
-#' bounding box requests follow the [-180,180] form.  Translation is done 
-#' automatically.
+#' bounding box requests must follow the [0,360] form.
 #'
 #' @include SPNC.R
 #' @export
@@ -57,7 +56,6 @@ OISSTRefClass$methods(
             count = c(lon=length(llon), lat=length(llat), zlev=length(zlev), time=length(time)),
             bb = .self$get_extent() ) 
       } else {
-         bb[1:2] <- to360(bb[1:2])
          ix <- spnc::find_interval(bb[0:2], llon)
          iy <- spnc::find_interval(bb[3:4], llat)
          # get these in order
@@ -76,8 +74,13 @@ OISSTRefClass$methods(
       }
       
       # not every OISST is made the same - some have zlev and others don't
-      # so we match ouur subnav to the actual dims
-      vnames <- c("lon", "lat", "time")
+      # so we match our subnav to the actual dims
+      VNAMES <- names(.self$NC[['dim']])
+      if ('zlev' %in% VNAMES) {
+         vnames <- c("lon", "lat", "zlev", "time") 
+      } else {
+         vnames <- c("lon", "lat", "time")
+      }
       s[['start']] <- s[['start']][vnames]
       s[['count']] <- s[['count']][vnames]
       s
@@ -160,12 +163,16 @@ OISST_get_raster <- function(NC, what = NC$VARS[1], time = 1, bb = NC$BB,
    tix <- NC$time_index(time)
    is_contiguous <- all(diff(tix) == 1)
    for (w in what){
-      if (is_contiguous){
+      if (is_contiguous && (length(tix) > 1)){
          snav <- subnav
          snav[['start']][['time']] <- tix[1]
          snav[['count']][['time']] <- length(tix)
          x <- ncdf4::ncvar_get(NC$NC, w, start = c(snav[['start']]), count = c(snav[['count']]) )
-         for(i in seq_len(dim(x)[3])) R <- addLayer(R, raster::raster(t(x[,,i]), template = R))
+         if (length(dim(x)) == 3){
+            for(i in seq_len(dim(x)[3])) R <- addLayer(R, raster::raster(t(x[,,i]), template = R))
+         } else {
+            R <- addLayer(R, raster::raster(t(x), template = R))
+         }
       } else {
          for (ix in tix){
             snav <- subnav

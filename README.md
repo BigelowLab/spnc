@@ -86,7 +86,11 @@ JPL's PO.DAAC provides this data as an NCML (filename.ncml) - an XML file that t
 
 + `OISST` [NOAA Optimum Interpolation (OI) Sea Surface Temperature ](http://www.esrl.noaa.gov/psd/data/gridded/data.noaa.oisst.v2.html)
 
-Currently this will access (a) locally downloaded files and (b) OpeNDAP files for a single time (dailies).  Access to the aggregate NCML OpeNDAP resources is still under development. Note that longitude is stored in the 0-360 format which requires some juggling internally.  You can still specify bounding boxes in [-180, 180] longitude form.  Here we access the same data two ways... 
+Currently this will access (a) locally downloaded files and (b) OpeNDAP files for a single time (dailies).  Access to the aggregate NCML OpeNDAP resources is still under development. Note that longitude is stored in the 0-360 format which requires some juggling internally. 
+
+Note that **you must specify bounding boxes in [0,360] longitude format.**  OISST is stored with longitudes referenced an the range [0,360].  Use ```spnc::to360()``` or ```spnc::to360BB()``` to convert longitudes from [-180,180] to [0,360].
+
+Bwlow we access the same data two ways... 
 
 + (a) download and unpack this file 
 
@@ -102,7 +106,8 @@ http://www.ncdc.noaa.gov/thredds/dodsC/oisst/NetCDF/AVHRR-AMSR/2004/AVHRR-AMSR/a
 library(raster)
 library(spnc)
 
-BB <- c(-72,-63,39,46)
+# note the transform from [-180,180] to [0,360] longitude
+BB <-  spnc::to360BB(c(-72,-63,39,46))
 
 localFile <- '/Users/ben/Downloads/amsr-avhrr-v2.20040101.nc'
 X <- SPNC(localFile)
