@@ -15,6 +15,7 @@ Author: Ben Tupper <btupper@bigelow.org>
 License: GPL (>= 2)
 Collate:
     'SPNC.R'
+    'CPCUGBDP.R'
     'L3SMI.R'
     'MURSST.R'
     'OISST.R'

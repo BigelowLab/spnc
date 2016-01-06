@@ -22,7 +22,8 @@ spnc_flavor <- function(x){
       MURSST = 'MUR',
       VIIRS = 'VIIRS Level-3 Standard Mapped Image',
       L3SMI = 'Level-3 Standard Mapped Image',
-      NHSCE = "Climate Data Record (CDR) of Northern Hemisphere (NH) Snow Cover Extent (SCE) (CDR Name: Snow_Cover_Extent_NH_IMS_Robinson)"
+      NHSCE = "Climate Data Record (CDR) of Northern Hemisphere (NH) Snow Cover Extent (SCE) (CDR Name: Snow_Cover_Extent_NH_IMS_Robinson)",
+      CPCUGBDP = "Unified Gauge-Based Analysis of Daily Precipitation"
       )
 
    if (inherits(x, "SPNCRefClass")){
@@ -69,7 +70,10 @@ spnc_flavor <- function(x){
          flvr[['source']] <- "VIIRS"
       } else if (grepl(lut[['NHSCE']], atts[['title']], fixed = TRUE)){
          flvr[['source']] <- "NHSCE"
+      } else if (grepl(lut[['CPCUGBDP']], atts[['title']], fixed = TRUE)){
+         flvr[['source']] <- "CPCUGBDP"
       }
+         
    }
    
    return(flvr)

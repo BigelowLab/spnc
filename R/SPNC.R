@@ -22,7 +22,6 @@ SPNCRefClass <- setRefClass("SPNCRefClass",
    methods = list(
       # initialize if a general kickoff
       initialize = function(nc = NULL, bb = NULL, ...){
-         #callSuper(...)
          .self$field("flavor", list(source = "", type = "", local = NA))
          .self$field("NC", NULL)
          .self$field("BB",  c(-180, 180, -90, 90))
@@ -523,6 +522,7 @@ SPNC <- function(nc, bb = NULL, nc_verbose = FALSE, n_tries = 3, ...){
       'modisl3smi' = MODISL3SMIRefClass$new(nc, bb = bb, ...),
       'hmodisl3smi' = SPNCRefClass$new(nc, bb = bb, ...),
       'nhsce' = NHSCERefClass$new(nc, bb = bb, ...),
+      'cpcugbdp' = CPCUGBDPRefClass$new(nc, bb = bb, ...),
       SPNCRefClass$new(nc, bb = bb, ...))
    
    invisible(X)

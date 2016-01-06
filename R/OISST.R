@@ -171,7 +171,7 @@ OISST_get_raster <- function(NC, what = NC$VARS[1], time = 1, bb = NC$BB,
          if (length(dim(x)) == 3){
             for(i in seq_len(dim(x)[3])) R <- addLayer(R, raster::raster(t(x[,,i]), template = R))
          } else {
-            R <- addLayer(R, raster::raster(t(x), template = R))
+            R <- raster::addLayer(R, raster::raster(t(x), template = R))
          }
       } else {
          for (ix in tix){

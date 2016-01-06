@@ -126,6 +126,25 @@ oi <- OI$get_raster(what = 'sst', time = mytimes)
 spplot(oi)
 ```
 
++ `CDCUGBDP` [CPC .25x.25 Daily US Unified Gauge-Based Analysis of Precipitation](http://www.esrl.noaa.gov/psd/data/gridded/data.unified.daily.conus.html)
+
+See more at the [wiki](https://github.com/btupper/spnc/wiki)
+
+```R
+library(raster)
+library(spnc)
+
+# note the transform from [-180,180] to [0,360] longitude
+BB <-  spnc::to360BB(c(-72,-63,39,46))
+
+ff <- 'http://www.esrl.noaa.gov/psd/thredds/dodsC/Datasets/cpc_us_precip/RT/precip.V1.0.2015.nc'
+X <- SPNC(ff)
+r <- X$get_raster(bb = BB, time = 1:5)
+
+spplot(r)
+```
+
+
 + `NHSCE` [Northern Hemisphere Snow Cover Extent](https://climatedataguide.ucar.edu/climate-data/snow-cover-extent-northern-hemisphere-climate-data-record-rutgers) 
 
 ```R
