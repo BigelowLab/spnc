@@ -144,6 +144,22 @@ r <- X$get_raster(bb = BB, time = 1:5)
 spplot(r)
 ```
 
++ `NARR` [NCEP North American Regional Reanalysis](http://www.esrl.noaa.gov/psd/data/gridded/data.narr.html)
+
+NARR is provided for the continental US plus a generous extension.  Data are stored with project coordinates so there are some signifiant difference between this and other classes that inherit from ```SPNCRefClass``` - see [this](http://www.esrl.noaa.gov/psd/data/narr/format.html) for more info.  Perhap the most significant difference is that the data are stored in a ```raster::RasterLayer``` form rather than as ncdf.  You might consider *not* using SPNC to access NARR datasets.  The 'best' utility of ```NARRRefClass``` is that requests for points or subset rasters  can be done using long/lat values rather than the projected coordinates.  
+
+```R
+library(raster)
+library(spnc)
+ff <- '/Users/Shared/data/ecocast/wx/air.sfc.2015.nc'
+bb <- c(-72,-63,39,46)
+X <- SPNC(ff)
+R <- X$get_raster()
+spplot(R)
+r <- X$get_raster(bb = bb)
+spplot(r)
+```
+
 
 + `NHSCE` [Northern Hemisphere Snow Cover Extent](https://climatedataguide.ucar.edu/climate-data/snow-cover-extent-northern-hemisphere-climate-data-record-rutgers) 
 

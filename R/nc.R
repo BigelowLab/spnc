@@ -25,6 +25,7 @@ ncglobal_atts <- function(NC, rm_pattern = 'NC_GLOBAL.', fixed = TRUE){
 #' @param NC a ncdf4 object
 #' @return a named vector of dimesnions
 ncdim_get <- function(NC){
+   stopifnot('dim' %in% names(NC))
    sapply(NC[['dim']], '[[', 'len')
 }
 
@@ -34,6 +35,7 @@ ncdim_get <- function(NC){
 #' @param NC a ncdf4 object
 #' @return a named vector variable names
 ncvarname_get <- function(NC){
+   stopifnot('dim' %in% names(NC))
    names(NC[['var']])
 }
 
@@ -44,6 +46,7 @@ ncvarname_get <- function(NC){
 #' @param NC a ncdf4 object
 #' @return a named list of variable dimension vectors
 ncvardim_get <- function(NC){
+   stopifnot('dim' %in% names(NC))
    vn <- names(NC[['var']])
    names(vn) <- vn
    get_vardim <- function(nm, NC = NULL){

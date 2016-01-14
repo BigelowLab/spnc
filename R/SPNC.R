@@ -197,7 +197,7 @@ SPNCRefClass$methods(
    })
 
 #' Get the step size (resolution) as a guess - the space between the first 
-#' on and lat values.  Subclasses with unambiguous steps sizes, like L3SMI and  
+#' lon and lat values.  Subclasses with unambiguous steps sizes, like L3SMI and  
 #' MURSST, should override this method.
 #'
 #' @name SPNCRefClass_step
@@ -247,6 +247,33 @@ SPNCRefClass$methods(
       yy <- llat[iy] + if (s[2] < 0) c(s[2],0) else c(0, s[2])       
       raster::extent(c(range(xx), range(yy)) )
    })
+
+
+#' Compute time indices (which must be contiguous) from POSIXt, Date or index.
+#' An warning is thrown if the dates requested are not contiguous.  If the object
+#' does not have TIME element then 1 is returned.
+#'
+#' @name SPNCRefClass_time_index
+#'
+#' @param when numeric, POSIXct or Date times
+#' @param no_zero logical, any times requested before the first time are mapped
+#'    to the first time
+#' @return one or more indices 
+NULL
+SPNCRefClass$methods(
+   time_index = function(when = 1, no_zero = TRUE){
+      if (is.null(.self$TIME)) return(1)
+      if (length(.self$TIME) <= 1) return(1)
+      if (inherits(when, 'POSIXt') || inherits(when, 'Date')) {    
+         ix <- find_interval(when, .self$TIME)
+      } else {
+         ix <- find_interval(when, seq_len(.self$NC[["dim"]][['time']][['len']]))
+      }
+      if (no_zero) ix[ix <= 0] <- 1
+      if (!all(diff(ix) == 1)) warning("time indices are not contiguous")
+      ix
+   })
+
 
 #' Get global attributes
 #'
@@ -320,7 +347,7 @@ SPNCRefClass$methods(
 #'
 #' @name SPNCRefClass_subset_bbox
 #'
-#' @seealso \url{http://r.789695.n4.nabble.com/Lat-Lon-NetCDF-subset-td3394326.html}
+#' @seealso \url{https://stat.ethz.ch/pipermail/r-help/2011-March/272641.html}
 #' @param bb numeric, four element bounding box [left, right, bottom, top]
 #' @return a list of \code{start} indices in x and y, \code{counts} in x and y and
 #'    a possibly updated copy of \code{bb} vector of [left, right, bottom, top]
@@ -422,7 +449,7 @@ SPNCRefClass$methods(
    get_points = function(what = .self$VARS, 
       layer = 1, 
       crs = "+proj=longlat +datum=WGS84"){
-      cat("SPNCRefClass$get_points: not implemented\n")
+       cat(paste0(classLabel(class(.self)),"$get_points: not implemented\n"))
       return(NULL)  
    })
 
@@ -437,7 +464,7 @@ NULL
 SPNCRefClass$methods(
    get_path = function(x, y, time, what = .self$VARS, 
       crs = "+proj=longlat +datum=WGS84"){
-      cat("SPNCRefClass$get_points: not implemented\n")
+       cat(paste0(classLabel(class(.self)),"$get_path: not implemented\n"))
       return(NULL)  
    })
 
@@ -461,8 +488,7 @@ SPNCRefClass$methods(
    get_raster = function(what = .self$VARS, layer = 1, bb = .self$BB,
       crs = "+proj=longlat +datum=WGS84", flip = TRUE,
       time_fmt = "D%Y%m%d"){
-      
-      cat("SPNCRefClass$get_raster: not implemented\n")
+      cat(paste0(classLabel(class(.self)),"$get_raster: not implemented\n"))
       return(NULL)
  
    }) # get_raster
@@ -523,6 +549,7 @@ SPNC <- function(nc, bb = NULL, nc_verbose = FALSE, n_tries = 3, ...){
       'hmodisl3smi' = SPNCRefClass$new(nc, bb = bb, ...),
       'nhsce' = NHSCERefClass$new(nc, bb = bb, ...),
       'cpcugbdp' = CPCUGBDPRefClass$new(nc, bb = bb, ...),
+      'narr' = NARRRefClass$new(nc, bb = bb, ...),
       SPNCRefClass$new(nc, bb = bb, ...))
    
    invisible(X)

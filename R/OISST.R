@@ -11,29 +11,6 @@
 OISSTRefClass <- setRefClass("OISSTRefClass",
     contains = "SPNCRefClass")
 
-#' Compute time indices (which must be contiguous) from POSIXt, Date or index.
-#' An error is thrown if the dates requested are not contiguous.
-#'
-#' @name OISSTRefClass_time_index
-#'
-#' @param when numeric, POSIXct or Date times
-#' @param no_zero logical, any times requested before the first time are mapped
-#'    to the first time
-#' @return one or more indices 
-NULL
-OISSTRefClass$methods(
-   time_index = function(when = 1, no_zero = TRUE){
-      
-      if (inherits(when, 'POSIXt') || inherits(when, 'Date')) {    
-         ix <- find_interval(when, .self$TIME)
-      } else {
-         ix <- find_interval(when, seq_len(.self$NC[["dim"]][['time']][['len']]))
-      }
-      if (no_zero) ix[ix <= 0] <- 1
-      ix
-   })
-
-
 
 #' Craft subset indices into a ncdf array
 #'

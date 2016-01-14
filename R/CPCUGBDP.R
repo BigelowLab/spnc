@@ -16,7 +16,6 @@ CPCUGBDPRefClass <- setRefClass("CPCUGBDPRefClass",
          hours <- nctime_get(nc, as_POSIXct = FALSE)
          time <- as.POSIXct("1800-01-01 00:00:0.0", tz = 'UTC') + (hours * 3600)
          .self$field("TIME", time)
-         TRUE
       })
    )
 #' Get the step size (resolution) as a guess - the space between the first 

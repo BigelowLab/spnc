@@ -18,6 +18,7 @@ Collate:
     'CPCUGBDP.R'
     'L3SMI.R'
     'MURSST.R'
+    'NARR.R'
     'OISST.R'
     'SPNC-package.R'
     'misc.R'

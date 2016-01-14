@@ -23,7 +23,8 @@ spnc_flavor <- function(x){
       VIIRS = 'VIIRS Level-3 Standard Mapped Image',
       L3SMI = 'Level-3 Standard Mapped Image',
       NHSCE = "Climate Data Record (CDR) of Northern Hemisphere (NH) Snow Cover Extent (SCE) (CDR Name: Snow_Cover_Extent_NH_IMS_Robinson)",
-      CPCUGBDP = "Unified Gauge-Based Analysis of Daily Precipitation"
+      CPCUGBDP = "Unified Gauge-Based Analysis of Daily Precipitation",
+      NARR="NARR"
       )
 
    if (inherits(x, "SPNCRefClass")){
@@ -72,8 +73,9 @@ spnc_flavor <- function(x){
          flvr[['source']] <- "NHSCE"
       } else if (grepl(lut[['CPCUGBDP']], atts[['title']], fixed = TRUE)){
          flvr[['source']] <- "CPCUGBDP"
+      } else if (grepl(lut[['NARR']], atts[['title']], fixed = TRUE)){
+         flvr[['source']] <- "NARR"
       }
-         
    }
    
    return(flvr)
@@ -353,7 +355,36 @@ subset_points <- function(x, y = NULL, lon = c(-180,180), lat = c(-90, 90)){
 } # subset_points
 
 
+#' Convert a bbox to sp::polygon, sp::Polygons, or sp::SpatialPolygons object
+#' 
+#' @export
+#' @param bb numeric, a 4-element bbox vector [left, right, bottom, top]
+#' @param projstring character sutiable to pass to \code{sp::CRS}, by default "+proj=longlat +datum=WGS84"
+#' @param id character, the polygon ID, by default 'bbox'
+#' @param output_class character, either "SpatialPolygons", "Polygons" or "Polygon"
+#' @return sp::SpatialPolygons object or NULL
+bbox_to_polygon <- function(bb, 
+   projstring = "+proj=longlat +datum=WGS84",
+   id = 'bbox',
+   output_class = c("SpatialPolygons", "Polygons",  "Polygon")[1]){
 
+   if(missing(bb)) stop("bounding box, bb, is required")
+   stopifnot(length(bb) == 4)
+   
+   # clockwise to form an 'island'
+   bb <- cbind(
+      x = c(bb[1], bb[1], bb[2], bb[2], bb[1]),
+      x = c(bb[3], bb[4], bb[4], bb[3], bb[3]) )
+   # project
+   bbp <- rgdal::project(bb, projstring)
+   # make a Polygon
+   Poly <- sp::Polygon(bbp)
+   if (output_class == 'Polygon') return(Poly)
+   # make into Polygons
+   Polys <- sp::Polygons(list(Poly), id)
+   if (output_class == 'Polygons') return(Polys)
+   SpatialPolygons(list(Polys), proj4string = CRS(projstring))
+}
 
 #' Extract a matrix of data from a SPNCRefClass of raster flavor
 #' 

@@ -14,6 +14,6 @@ a list of \code{start} indices in x and y, \code{counts} in x and y and
 Craft subset indices into a ncdf array
 }
 \seealso{
-\url{http://r.789695.n4.nabble.com/Lat-Lon-NetCDF-subset-td3394326.html}
+\url{https://stat.ethz.ch/pipermail/r-help/2011-March/272641.html}
 }
 
