@@ -1,5 +1,29 @@
 # CPCUGBDP
 
+
+#' Test if an NCDF contains CPCUGBDP data.
+#' 
+#' @export
+#' @param x ncdf4 object or SPNCRefClass
+#' @return logical
+is_CPCUGBDP <- function(x){
+   ok <- FALSE
+   if (inherits(x, "SPNCRefClass")){
+      atts <- try(ncglobal_atts(x$NC))
+   } else if(inherits(x, "ncdf4")){
+      atts <- try(ncglobal_atts(x))
+   } else {
+      warning("input must be either SPNCRefClass or ncdf4 class object")
+      return(ok)
+   }
+   natts <- names(atts) <- tolower(names(atts))
+   if ('title' %in% natts)
+      ok <- mgrepl("Unified Gauge-Based Analysis of Daily Precipitation", 
+      atts[['title']], fixed = TRUE)  
+   ok 
+}
+
+
 #' A subclass of SPNCRefClass for CPC .25x.25 Daily US Unified Gauge-Based Analysis of Precipitation \url{http://www.esrl.noaa.gov/psd/data/gridded/data.unified.daily.conus.html}
 #' 
 #' Lat is an ascending order [-90, 90] and while Lon in mapped to [0,360] 

@@ -14,18 +14,6 @@ spnc_flavor <- function(x){
    
    flvr <- list(source = "", type = "raster", local = NA)
    filename <- NULL 
-   lut = c(
-      OISST = 'Daily-OI-V2, Final, Data',
-      MODISL3SMI = 'MODIS Level-3 Standard Mapped Image',
-      HMODISL3SMI = 'HMODISA Level-3 Standard Mapped Image',
-      #MURSST = 'Multi-scale Ultra-high Resolution (MUR) SST analysis',
-      MURSST = 'MUR',
-      VIIRS = 'VIIRS Level-3 Standard Mapped Image',
-      L3SMI = 'Level-3 Standard Mapped Image',
-      NHSCE = "Climate Data Record (CDR) of Northern Hemisphere (NH) Snow Cover Extent (SCE) (CDR Name: Snow_Cover_Extent_NH_IMS_Robinson)",
-      CPCUGBDP = "Unified Gauge-Based Analysis of Daily Precipitation",
-      NARR="NARR"
-      )
 
    if (inherits(x, "SPNCRefClass")){
       atts <- try(x$get_global_atts())
@@ -37,7 +25,6 @@ spnc_flavor <- function(x){
          return(flvr)
       }
       atts <- try(ncglobal_atts(x))
-      #atts <- try(ncdf4::ncatt_get(x, varid = 0))
       filename <- x[['filename']]
    }
     
@@ -51,35 +38,46 @@ spnc_flavor <- function(x){
    
    natts <- names(atts) <- tolower(names(atts))
 
-
    # try by title
    # note that the default type is 'raster' but others, as needed,
    # must be assigned with flvr[['type']] <- 'points' or whatever
-   if ("title" %in% natts){
-      #if ( nzchar(flvr[['source']]) ) return(flvr)
-      if (grepl(lut[['HMODISL3SMI']], atts[['title']], fixed = TRUE)){
-         flvr[['source']] <- "HMODISL3SMI"
-      } else if (grepl(lut[['L3SMI']], atts[['title']], fixed = TRUE)){
-         flvr[['source']] <- "L3SMI"  # OBPG
-      } else if (grepl(tolower(lut[['OISST']]), tolower(atts[['title']]), fixed = TRUE)){
-         flvr[['source']] <- "OISST"
-      } else if (grepl(lut[['MODISL3SMI']], atts[['title']], fixed = TRUE)){
-         flvr[['source']] <- "MODISL3SMI"
-      } else if (grepl(lut[['MURSST']], atts[['title']], fixed = TRUE)){
-         flvr[['source']] <- "MURSST"
-      } else if (grepl(lut[['VIIRS']], atts[['title']], fixed = TRUE)){
-         flvr[['source']] <- "VIIRS"
-      } else if (grepl(lut[['NHSCE']], atts[['title']], fixed = TRUE)){
-         flvr[['source']] <- "NHSCE"
-      } else if (grepl(lut[['CPCUGBDP']], atts[['title']], fixed = TRUE)){
-         flvr[['source']] <- "CPCUGBDP"
-      } else if (grepl(lut[['NARR']], atts[['title']], fixed = TRUE)){
-         flvr[['source']] <- "NARR"
-      }
+      
+   if (is_L3SMI(x)){
+      flvr[['source']] <- "L3SMI"
+   } else if (is_OISST(x)){
+      flvr[['source']] <- "OISST"
+   } else if (is_MURSST(x)){
+      flvr[['source']] <- "MURSST"
+   } else if (is_CPCUGBDP(x)){
+      flvr[['source']] <- "CPCUGBDP"
+   } else if (is_NARR(x)){
+      flvr[['source']] <- "NARR"
+   } else if (is_NAMANL(x)){
+      flvr[['source']] <- "NAMANL"
+   } else if (is_NCEP(x)){
+      flvr[['source']] <- "NCEP"
    }
+   
    
    return(flvr)
 }
+
+
+#' Perform grepl on multiple patterns; it's like OR-ing successive grepl statements.
+#' 
+#' @export
+#' @param pattern character vector of patterns
+#' @param x the character vector to search
+#' @param ... further arguments for \code{grepl}
+#' @return logical vector of matches where at least one element of \code{pattern} 
+#'    is found in \code{x}
+mgrepl <- function(pattern, x, ...){
+   ix <- do.call(rbind, lapply(pattern, 
+      function(p, x = "", ...){ grepl(p, x, ...) },
+      x = x, ...))  
+   ok <- apply(ix, 2, any)
+}
+
 
 
 #' Convert bounding box [0,360] longitudes to [-180, 180]

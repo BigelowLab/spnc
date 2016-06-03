@@ -1,5 +1,28 @@
 # MURSST
 
+
+#' Test if an NCDF contains MURSST data.
+#' 
+#' @export
+#' @param x ncdf4 object or SPNCRefClass
+#' @return logical
+is_MURSST <- function(x){
+   ok <- FALSE
+   if (inherits(x, "SPNCRefClass")){
+      atts <- try(ncglobal_atts(x$NC))
+   } else if(inherits(x, "ncdf4")){
+      atts <- try(ncglobal_atts(x))
+   } else {
+      warning("input must be either SPNCRefClass or ncdf4 class object")
+      return(ok)
+   }
+   natts <- names(atts) <- tolower(names(atts))
+   if ('title' %in% natts)
+      ok <- mgrepl('MUR',atts[['title']], fixed = TRUE) 
+   ok  
+}
+
+
 #' A subclass of SPNCRefClass for Multi-scale Ultra-high Resolution Sea Surface Temperature \url{http://mur.jpl.nasa.gov/}
 #' 
 #' @include SPNC.R

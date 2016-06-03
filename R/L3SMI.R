@@ -1,5 +1,31 @@
 # L3SMI.R
 
+
+
+
+#' Test if an NCDF contains L3SMI data.
+#' 
+#' @export
+#' @param x ncdf4 object or SPNCRefClass
+#' @return logical
+is_L3SMI <- function(x){
+   ok <- FALSE
+   if (inherits(x, "SPNCRefClass")){
+      atts <- try(ncglobal_atts(x$NC))
+   } else if(inherits(x, "ncdf4")){
+      atts <- try(ncglobal_atts(x))
+   } else {
+      warning("input must be either SPNCRefClass or ncdf4 class object")
+      return(ok)
+   }
+   natts <- names(atts) <- tolower(names(atts))
+   if ('title' %in% natts)
+      ok <- mgrepl('Level-3 Standard Mapped Image', 
+         atts[['title']], fixed = TRUE)   
+   ok
+}
+
+
 #' A subclass of SPNCRefClass for OBPG L3 Standard Mapped Image
 #' 
 #' @include SPNC.R

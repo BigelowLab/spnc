@@ -1,5 +1,28 @@
 # NARRRefClass.R
 
+
+#' Test if an NCDF contains NARR data.
+#' 
+#' @export
+#' @param x ncdf4 object or SPNCRefClass
+#' @return logical
+is_NARR <- function(x){
+   ok <- FALSE
+   if (inherits(x, "SPNCRefClass")){
+      atts <- try(ncglobal_atts(x$NC))
+   } else if(inherits(x, "ncdf4")){
+      atts <- try(ncglobal_atts(x))
+   } else {
+      warning("input must be either SPNCRefClass or ncdf4 class object")
+      return(ok)
+   }
+   natts <- names(atts) <- tolower(names(atts))
+   if ('title' %in% natts)
+      ok <- mgrepl('NARR', atts[['title']], fixed = TRUE)
+   ok
+}
+
+
 #' A subclass of SPNCRefClass for [NARR](http://www.esrl.noaa.gov/psd/data/gridded/data.narr.html) NCEP North American Regional Reanalysis
 #' 
 #' This NetCDF data is projected and can be ready by the \code{raster} package. Unlike
@@ -21,7 +44,8 @@ NARRRefClass <- setRefClass("NARRRefClass",
    ),  # fields
    methods = list(
       init = function(nc){
-         .self$field('R', raster::raster(nc$filename))
+         d <- ncdim_get(nc)
+         .self$field('R', raster::brick(nc$filename, nl = d[['time']]))
          #.self$BB <- as.vector(raster::extent(.self$R))
          xy <- raster::xyFromCell(.self$R, 1:raster::ncell(.self$R))
          nx <- ncol(.self$R)

@@ -39,6 +39,9 @@ SPNCRefClass <- setRefClass("SPNCRefClass",
          if (!is.null(bb)) .self$BB <- bb
          
       },
+      finalize = function(){
+         ok <- .self$close()
+      }, 
       # init is a bit more specific and may be overwriten by subclasses
       # in here we deal with extracting from the ncdf resource
       init = function(nc){
@@ -46,7 +49,7 @@ SPNCRefClass <- setRefClass("SPNCRefClass",
          .self$field("VARS", names(nc[['var']]))
          .self$field("STEP", .self$step()) 
          e <- .self$get_extent()
-         .self$BB <- c(e@xmin, e@xmax, e@ymin, e@ymax)
+         .self$BB <- raster::as.vector(e) # c(e@xmin, e@xmax, e@ymin, e@ymax)
          if ("zlev" %in% names(.self$DIMS)) .self$field("Z", nc[["dim"]][['zlev']][['vals']])
          if ("time" %in% names(.self$DIMS)) .self$field("TIME", nctime_get(nc))
          return(TRUE)
@@ -104,12 +107,12 @@ SPNCRefClass$methods(
 NULL
 SPNCRefClass$methods(
       is_open = function(){
-         !is.null(.self$NC)
+         !is.null(.self$NC) && inherits(.self$NC, "ncdf4")
    }) # is_open
    
 #' Open the ncdf4 object
 #'
-#' #' @name SPNCRefClass_open
+#' @name SPNCRefClass_open
 #' @param path the path to the connection, if not present then try the 
 #'     object's path
 #' @param ... furtehr arguments for ncfd4::nc_open
@@ -545,11 +548,10 @@ SPNC <- function(nc, bb = NULL, nc_verbose = FALSE, n_tries = 3, ...){
       'l3smi' = L3SMIRefClass$new(nc, bb = bb, ...),
       'oisst' = OISSTRefClass$new(nc, bb = bb, ...),
       'mursst' = MURSSTRefClass$new(nc, bb = bb, ...),
-      'modisl3smi' = MODISL3SMIRefClass$new(nc, bb = bb, ...),
-      'hmodisl3smi' = SPNCRefClass$new(nc, bb = bb, ...),
-      'nhsce' = NHSCERefClass$new(nc, bb = bb, ...),
       'cpcugbdp' = CPCUGBDPRefClass$new(nc, bb = bb, ...),
       'narr' = NARRRefClass$new(nc, bb = bb, ...),
+      'namanl' = NAMANLRefClass$new(nc, bb = bb, ...),
+      'ncep' = NCEPRefClass$new(nc, bb = bb, ...),
       SPNCRefClass$new(nc, bb = bb, ...))
    
    invisible(X)

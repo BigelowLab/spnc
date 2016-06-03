@@ -18,8 +18,11 @@ Collate:
     'CPCUGBDP.R'
     'L3SMI.R'
     'MURSST.R'
+    'NAMANL.R'
     'NARR.R'
+    'NCEP.R'
     'OISST.R'
     'SPNC-package.R'
     'misc.R'
     'nc.R'
+RoxygenNote: 5.0.1
