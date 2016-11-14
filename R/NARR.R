@@ -168,7 +168,7 @@ NARRRefClass$methods(
 #' @param y numeric vector of y locations - if NULL then these must be part of x
 #' @param time numeric index or POSIXct 
 #' @param ... further arguments for \code{raster::extract()}
-#' @param return as specified by \code{raster::extract()}
+#' @return as specified by \code{raster::extract()}
 NARRRefClass$methods(
    get_points = function(x, y = NULL, time = 1, ...){
       NARR_get_points(.self, x, y = y, time = time, ...)
@@ -206,7 +206,7 @@ NARR_get_raster <- function(X, bb = NULL, time = 1, what = NULL,
 #' @param y numeric vector of y locations - if NULL then these must be part of x
 #' @param time numeric index or POSIXct 
 #' @param ... further arguments for \code{raster::extract()}
-#' @param return as specified by \code{raster::extract()}
+#' @return as specified by \code{raster::extract()}
 NARR_get_points <- function(X, x, y = NULL, time = 1, ...){
    tix <- X$time_index(time)
    xy <- cbind(grDevices::xy.coords(x, y=y)[c('x', 'y')])

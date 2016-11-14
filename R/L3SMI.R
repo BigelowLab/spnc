@@ -182,6 +182,7 @@ L3SMI_get_raster <- function(NC, what = NC$VARS[1], layer = 1,bb = NC$BB,
 #' @param x numeric, vector of longitude points or, if y is NULL, a matrix [x,y] 
 #'     or a data.frame or list with x,y elements
 #' @param y numeric vector of lattitude points or NULL
+#' @param what character one or more variable names or variable indices
 #' @return numeric vector of values
 L3SMI_get_points <- function(NC, x, y = NULL, what = NC$VARS[1]){
    
@@ -190,7 +191,7 @@ L3SMI_get_points <- function(NC, x, y = NULL, what = NC$VARS[1]){
    p <- spnc::subset_points(x,y=y,lon=NC$lon("leading"), lat=NC$lat("leading"))
    
    sapply(p, 
-         function(x, nc = null, what = 1){
+         function(x, nc = NULL, what = 1){
             if (!is.list(x) && is.na(x)){
                r <- NA
             } else {

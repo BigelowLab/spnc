@@ -17,8 +17,9 @@ of x and y locations}
 \item{time}{numeric index or POSIXct}
 
 \item{...}{further arguments for \code{raster::extract()}}
-
-\item{return}{as specified by \code{raster::extract()}}
+}
+\value{
+as specified by \code{raster::extract()}
 }
 \description{
 Get data values by specifying long/lat locations

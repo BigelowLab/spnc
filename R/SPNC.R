@@ -528,10 +528,10 @@ SPNC <- function(nc, bb = NULL, nc_verbose = FALSE, n_tries = 3, ...){
          nc <- try(ncdf4::nc_open(path, verbose = nc_verbose))
          if (inherits(nc, 'try-error')){
             if (i < n_tries) {
-               flush.console()
+               utils::flush.console()
                cat(sprintf("  attempt %i failed, trying again\n", i))
             } else {
-               flush.console()
+               utils::flush.console()
                cat("  ***\nexhausted permitted tries, returning NULL\n  ***\n")
             }
             nc <- NULL
