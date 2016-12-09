@@ -161,6 +161,31 @@ spplot(r)
 ```
 
 
++ `Blended Sea Winds` [NOAA/NCEI](https://www.ncdc.noaa.gov/data-access/marineocean-data/blended-global/blended-sea-winds)
+
+Blended Sea Winds provides global daily coverage of `u`, `v` and `w` winds on a 0.25 degree going back the 1980s.
+
+```R
+library(raster)
+library(rasterVis)
+library(spnc)
+uri <-'https://www.ncdc.noaa.gov/thredds/dodsC/oceanwindsdly'
+BB <- c(-72,-63,39,46)
+BB360 <- spnc::to360BB(BB)
+X <- SPNC(uri, bb = BB360)
+layer = as.POSIXct("2015-08-15", tz = 'UTC')
+u <- X$get_raster(what = 'u', layer = layer)
+v <- X$get_raster(what = 'v', layer = layer)
+R <- raster::stack(u,v)
+R <- raster::rotate(R)
+names(R) <- c("u", "v")
+P <- rasterVis::vectorplot(R, isField = 'dXY')
+png(); print(P); dev.off()
+```
+
+
+
+
 + `NHSCE` [Northern Hemisphere Snow Cover Extent](https://climatedataguide.ucar.edu/climate-data/snow-cover-extent-northern-hemisphere-climate-data-record-rutgers) 
 
 ```R

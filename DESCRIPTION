@@ -16,6 +16,7 @@ Author: Ben Tupper <btupper@bigelow.org>
 License: MIT + file LICENSE
 Collate:
     'SPNC.R'
+    'BlendedSeaWindRefClass.R'
     'CPCUGBDP.R'
     'L3SMI.R'
     'MURSST.R'

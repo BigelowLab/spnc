@@ -1,8 +1,6 @@
 # L3SMI.R
 
 
-
-
 #' Test if an NCDF contains L3SMI data.
 #' 
 #' @export

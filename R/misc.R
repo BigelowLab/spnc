@@ -56,6 +56,8 @@ spnc_flavor <- function(x){
       flvr[['source']] <- "NAMANL"
    } else if (is_NCEP(x)){
       flvr[['source']] <- "NCEP"
+   } else if (is_BSW(x)){
+      flvr[['source']] <- "BSW"
    }
    
    

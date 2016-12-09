@@ -553,6 +553,7 @@ SPNC <- function(nc, bb = NULL, nc_verbose = FALSE, n_tries = 3, ...){
       'narr' = NARRRefClass$new(nc, bb = bb, ...),
       'namanl' = NAMANLRefClass$new(nc, bb = bb, ...),
       'ncep' = NCEPRefClass$new(nc, bb = bb, ...),
+      'bsw' = BlendedSeaWindsRefClass$new(nc, bb, ...),
       SPNCRefClass$new(nc, bb = bb, ...))
    
    invisible(X)
