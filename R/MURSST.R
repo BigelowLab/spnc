@@ -31,6 +31,50 @@ MURSSTRefClass <- setRefClass("MURSSTRefClass",
     contains = "SPNCRefClass")
 
 
+#' Get the step size (resolution) as a guess - the space between the first 
+#' lon and lat values.  Subclasses with unambiguous steps sizes, like L3SMI and  
+#' MURSST, should override this method.
+#'
+#' @name MURSSTClass_step
+#' @return two element numeric vector of step size in x and y or NULL
+#' These may be signed for descending values of lon and or lat
+NULL
+MURSSTRefClass$methods(
+   step = function(){
+      c(0.01, 0.01)
+   })
+
+  
+#' Compute extent given a bounding box
+#' 
+#' @name MURSSTRefClass_get_extent
+#' @param bb the bounding box needed, if missing the current one is used
+#' @return a raster::Extent object
+NULL
+MURSSTRefClass$methods(
+   get_extent = function(bb){
+      if (missing(bb)){
+         x <- range(.self$NC$dim$lon$vals)
+         y <- range(.self$NC$dim$lat$vals)
+         s <- .self$step()
+         #bb <- c(range(.self$lon()[c(1,nx)]), range(.self$lat()[c(1,ny)]))
+         bb <- c( x + c(-s[1], s[1]), y + c(-s[2], s[2]))
+         return(raster::extent(bb))
+      }
+      if (identical(bb, .self$BB)) return(raster::extent(.self$BB))
+      
+      llon <- .self$lon("leading")
+      llat <- .self$lat("leading")
+      ix <- find_interval(bb[1:2], llon)
+      ix[ix < 1] <- 1
+      iy <- find_interval(bb[3:4], llat)
+      iy[ix < 1] <- 1
+      
+      s <- .self$STEP
+      xx <- llon[ix] + if (s[1] < 0) c(s[1],0) else c(0, s[1])
+      yy <- llat[iy] + if (s[2] < 0) c(s[2],0) else c(0, s[2])       
+      raster::extent(c(range(xx), range(yy)) )
+   })   
 
 #' Compute indicies (start and count) for individual [lon,lat] points
 #' 

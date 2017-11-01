@@ -13,6 +13,7 @@ SPNCRefClass <- setRefClass("SPNCRefClass",
    fields = list(
       flavor = 'list',# source=path, type=raster|point, local=logical
       NC = 'ANY',          # the ncdf4 class object
+      GATTS = 'ANY',       # ncdf4 global attributes if any
       BB = 'numeric',      # the 4 element bounding box
       DIMS = 'numeric',    # the dimensions
       VARS = 'character',  # the variable names
@@ -45,9 +46,11 @@ SPNCRefClass <- setRefClass("SPNCRefClass",
       # init is a bit more specific and may be overwriten by subclasses
       # in here we deal with extracting from the ncdf resource
       init = function(nc){
+         .self$field("GATTS", .self$get_global_atts())
          .self$field("DIMS", ncdim_get(nc))
          .self$field("VARS", names(nc[['var']]))
          .self$field("STEP", .self$step()) 
+         
          e <- .self$get_extent()
          #.self$BB <- raster::as.vector(e) # c(e@xmin, e@xmax, e@ymin, e@ymax)
          .self$BB <- c(e@xmin, e@xmax, e@ymin, e@ymax)

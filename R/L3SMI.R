@@ -45,17 +45,95 @@ L3SMIRefClass <- setRefClass("L3SMIRefClass",
 #'
 #' @name L3SMIRefClass_step
 #' @return two element numeric vector of step size in x and y or NULL.
-#' These may be signed for descending values of lon and or lat
 NULL
 L3SMIRefClass$methods(
    step = function(){
-      atts <- .self$get_global_atts()
-      lat <- .self$lat()
-      onelat <- if (lat[2]-lat[1] > 0) ? 1 else -1
-      c(atts[['longitude_step']], onelat*atts[['latitude_step']])
+      c((.self$GATTS[['easternmost_longitude']] - .self$GATTS[['westernmost_longitude']])/.self$DIMS[['lon']],
+        (.self$GATTS[['northernmost_latitude']] - .self$GATTS[['southernmost_latitude']])/.self$DIMS[['lat']])
    })
    
+
+
+#' Compute extent given a bounding box
+#' 
+#' @name L3SMIRefClass_get_extent
+#' @param bb the bounding box needed, if missing the current one is used
+#' @return a raster::Extent object
+NULL
+L3SMIRefClass$methods(
+   get_extent = function(bb){
+      s <- .self$step()
+      if (missing(bb)){
+         rx <- range(.self$lon('center'))
+         ry <- range(.self$lat('center'))
+         bb <- c(
+            rx[1] - s[1]/2, 
+            rx[2] + s[1]/2,
+            ry[1] - s[2]/2, 
+            ry[2] + s[2]/2)
+         
+      }
+      if (identical(bb, .self$BB)) return(raster::extent(bb))
+      
+      llon <- .self$lon("center")
+      llat <- .self$lat("center")
+      ix <- find_interval(bb[1:2], llon)
+      ix[ix < 1] <- 1
+      iy <- find_interval(bb[3:4], llat)
+      iy[iy < 1] <- 1
+      
+      xx <- llon[ix] + c(-s[1], s[1])/2
+      yy <- llat[iy] + c(-s[2], s[2])/2       
+      raster::extent(c(range(xx), range(yy)) )
+   })
+
+
+#' Craft subset indices into a ncdf array
+#'
+#' @name L3SMIRefClass_subset_bbox
+#'
+#' @seealso \url{https://stat.ethz.ch/pipermail/r-help/2011-March/272641.html}
+#' @param bb numeric, four element bounding box [left, right, bottom, top]
+#' @return a list of 
+#' \itemize{
+#'  \item{start indices in x and y} 
+#'  \item{counts in x and y}
+#'  \item{bb vector of [left, right, bottom, top] pixel centers}
+#'  \item{ext extent vector [left, right, bottom, top] pixel outer edges}
+#'  }
+NULL
+L3SMIRefClass$methods(
+   subset_bbox = function(bb = NULL){
+      llon <- .self$lon("leading")
+      llat <- .self$lat("leading")
+      if (is.null(bb)){
+         return(
+            list(start = c(lon=1,lat=1), count = c(lon=length(llon), lat=length(llat)),
+               bb = .self$get_extent() ) 
+            )
+      }
+      
+      ix <- range(spnc::find_interval(bb[0:2], llon))
+      iy <- range(spnc::find_interval(bb[3:4], llat))
+
+      # make sure they fit within the dims of the data
+      ix <- spnc::coerce_within(ix, c(1, length(llon)))
+      iy <- spnc::coerce_within(iy, c(1, length(llat)))
+      s <- .self$STEP
+      #xx <- llon[ix] + if (s[1] < 0) c(s[1],0) else c(0, s[1])
+      #yy <- llat[iy] + if (s[2] < 0) c(s[2],0) else c(0, s[2]) 
+      
+      xx <- range(.self$lon("center")[ix])
+      yy <- range(.self$lat("center")[iy])
+      
+      list(start = c(lon=ix[1], lat=iy[1]), 
+         count = c(lon=ix[2]-ix[1]+1, lat=iy[2]-iy[1]+1),
+         bb = c(xx, yy),
+         ext = c(xx + c(-0.5,0.5)*s[1], yy + c(-0.5, 0.5)*s[2]) )
+   }) # subset_bbox
    
+   
+
 #' Get a raster
 #' 
 #' @name L3SMIRefClass_get_raster
@@ -105,7 +183,7 @@ L3SMIRefClass$methods(
 #' Get a raster for L3SMIRefClass
 #' 
 #' @export
-#' @param NC L3SMIRefClass object
+#' @param X L3SMIRefClass object
 #' @param what character one or more variable names or variable indices
 #' @param layer numeric vector either a 1-based indices or POSIXct timestamps
 #' @param bb a 4 element bounding box vector [left, right, bottom, top], defaults
@@ -114,61 +192,73 @@ L3SMIRefClass$methods(
 #' @param flip logical if TRUE then flip the raster in the y direction
 #' @param time_fmt if multiple time layers are returned, this controls the layer names
 #' @return a \code{raster::brick} or \code{raster::layer} object or NULL
-L3SMI_get_raster <- function(NC, what = NC$VARS[1], layer = 1,bb = NC$BB,
+L3SMI_get_raster <- function(X, what = X$VARS[1], layer = 1, bb = X$BB,
       crs = "+proj=longlat +datum=WGS84", flip = FALSE, time_fmt = "D%Y%j"){
    
-   stopifnot(inherits(NC, "L3SMIRefClass"))
-   subnav <- NC$subset_bbox(bb)
-   ext <- NC$get_extent(bb = subnav[['bb']])
-   
-   R <- raster::raster(nrow = subnav[['count']][2], 
-      ncol = subnav[['count']][1],  ext = ext, crs = crs) 
-     
-   if (NC$flavor[['local']] == TRUE){
+
+    if (FALSE){
+        layer = 1
+        crs = "+proj=longlat +datum=WGS84"
+        flip = FALSE
+        time_fmt = "D%Y%j"
+    }
+    
+    stopifnot(inherits(X, "L3SMIRefClass"))
+    subnav <- X$subset_bbox(bb)
+        
+    template <- raster::raster(
+        #nrow = subnav[['count']][2], 
+        #ncol = subnav[['count']][1],  
+        resolution = X$step(),
+        ext = raster::extent(subnav[['ext']]),
+        crs = crs) 
       
-      x <- ncdf4::ncvar_get(NC$NC, what[1], 
-            start = subnav[['start']], 
-            count = subnav[['count']] )
-            
-      R <- raster::raster(t(x), template = R)
-      
-   } else {
-   
-      getOneVar <- function(vname, NC, subnav,
-         crs = "+proj=longlat +datum=WGS84"){
-         ncdf4::ncvar_get(NC, vname, 
-            start = c(subnav[['start']], layer[1]), 
-            count = c(subnav[['count']], 1) )
-      }
-      getOneLayer <- function(layer, NC, subnav, what = names(NC[['var']])[[1]],
-         crs = "+proj=longlat +datum=WGS84"){
-         ncdf4::ncvar_get(NC, what, 
-            start = c(subnav[['start']]), 
-            count = c(subnav[['count']]) )
-      }
-      
-      
-      if (length(what) > 1){   
-         X <- lapply(what, getOneVar, NC$NC, subnav, crs = crs, layer = layer[1] )
-         for (w in names(X)) R <- raster::addLayer(R, 
-            raster::raster(t(X[[w]]), template = R))
-         names(R) <- what
-      } else {
-         X <- lapply(layer, getOneLayer, NC$NC, subnav, crs = crs, what = what[1]) 
-         for (r in X) R <- raster::addLayer(R, 
-            raster::raster(t(r), template = R))
-         if (length(NC$TIME) > 1){
-            names(R) <- format(NC$TIME[layer], time_fmt)
-         } else {
-            names(R) <- paste("layer", layer, sep = "_")
-         } 
-      } # multiple variable?
-   
-   } # local or OpenDAP?
-   
-   if (flip) R <- raster::flip(R,"y")
-   
-   return(R)
+    if (X$flavor[['local']] == TRUE){
+       
+       x <- ncdf4::ncvar_get(X$NC, what[1], 
+             start = subnav[['start']], 
+             count = subnav[['count']] )
+             
+       R <- raster::raster(t(x), template = template)
+       
+    } else {
+    
+       getOneVar <- function(vname, NC, subnav,
+          crs = "+proj=longlat +datum=WGS84"){
+          ncdf4::ncvar_get(NC, vname, 
+             start = c(subnav[['start']], layer[1]), 
+             count = c(subnav[['count']], 1) )
+       }
+       getOneLayer <- function(layer, NC, subnav, what = names(NC[['var']])[[1]],
+          crs = "+proj=longlat +datum=WGS84"){
+          ncdf4::ncvar_get(NC, what, 
+             start = c(subnav[['start']]), 
+             count = c(subnav[['count']]) )
+       }
+       
+       
+       if (length(what) > 1){   
+          RR <- lapply(what, getOneVar, X$NC, subnav, crs = crs, layer = layer[1] )
+          for (w in names(RR)) R <- raster::addLayer(R, 
+             raster::raster(t(RR[[w]]), template = template))
+          names(R) <- what
+       } else {
+          RR <- lapply(layer, getOneLayer, X$NC, subnav, crs = crs, what = what[1])
+          R <- template
+          for (r in RR) R <- raster::addLayer(R, 
+             raster::raster(t(r), template = template))
+          if (length(X$TIME) > 1){
+             names(R) <- format(X$TIME[layer], time_fmt)
+          } else {
+             names(R) <- paste("layer", layer, sep = "_")
+          } 
+       } # multiple variable?
+    
+    } # local or OpenDAP?
+    
+    if (flip) R <- raster::flip(R,"y")
+    
+    return(R)
 }
 
 

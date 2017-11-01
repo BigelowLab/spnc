@@ -5,7 +5,6 @@
 \title{Get the step size (resolution) as reported in the global attributes.}
 \value{
 two element numeric vector of step size in x and y or NULL.
-These may be signed for descending values of lon and or lat
 }
 \description{
 Get the step size (resolution) as reported in the global attributes.

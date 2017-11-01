@@ -374,16 +374,16 @@ bbox_to_polygon <- function(bb,
    # clockwise to form an 'island'
    bb <- cbind(
       x = c(bb[1], bb[1], bb[2], bb[2], bb[1]),
-      x = c(bb[3], bb[4], bb[4], bb[3], bb[3]) )
+      y = c(bb[3], bb[4], bb[4], bb[3], bb[3]) )
    # project
-   bbp <- rgdal::project(bb, projstring)
+   #bbp <- rgdal::project(bb, projstring)
    # make a Polygon
-   Poly <- sp::Polygon(bbp)
+   Poly <- sp::Polygon(bb)
    if (output_class == 'Polygon') return(Poly)
    # make into Polygons
    Polys <- sp::Polygons(list(Poly), id)
    if (output_class == 'Polygons') return(Polys)
-   sp::SpatialPolygons(list(Polys), proj4string = CRS(projstring))
+   sp::SpatialPolygons(list(Polys), proj4string = sp::CRS(projstring))
 }
 
 #' Extract a matrix of data from a SPNCRefClass of raster flavor
