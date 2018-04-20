@@ -4,7 +4,7 @@
 #'
 #' @export
 #' @param x the netcdf4 or SPNCRefClass object
-#' @param return list of 
+#' @return return list of 
 #'  \itemize{
 #'    \item source character of 'MURSST', 'OISST', etc. "" means unknown
 #'    \item type character of 'raster', 'points', etc. "" means unknown
@@ -56,6 +56,8 @@ spnc_flavor <- function(x){
       flvr[['source']] <- "NAMANL"
    } else if (is_NCEP(x)){
       flvr[['source']] <- "NCEP"
+   } else if (is_BSW(x)){
+      flvr[['source']] <- "BSW"
    }
    
    
@@ -131,13 +133,13 @@ find_interval <- function(x, vec, rightmost.closed = FALSE, all.inside = FALSE){
 
    # locate one value of x within v
    # @param v ordered numeric vector
-   # @param x one numeric lo locate within v
+   # @param x one numeric to locate within v
    # @return index into v
    locate_one <- function(v, x){
       n <- length(v)
       ascnd <- v[n] >= v[1]
       iL <- 1
-	   iU <- n
+      iU <- n
       while((iU-iL) > 1){
          iM <- bitwShiftR((iU+iL),1)
          if (ascnd){
@@ -156,7 +158,7 @@ find_interval <- function(x, vec, rightmost.closed = FALSE, all.inside = FALSE){
       }
       
       if (ascnd) {
-			if ( val < v[1]) {
+			if ( x < v[1]) {
 				index <- 0
 			} else if (x >= v[n]) {
 				index <- n
@@ -372,16 +374,16 @@ bbox_to_polygon <- function(bb,
    # clockwise to form an 'island'
    bb <- cbind(
       x = c(bb[1], bb[1], bb[2], bb[2], bb[1]),
-      x = c(bb[3], bb[4], bb[4], bb[3], bb[3]) )
+      y = c(bb[3], bb[4], bb[4], bb[3], bb[3]) )
    # project
-   bbp <- rgdal::project(bb, projstring)
+   #bbp <- rgdal::project(bb, projstring)
    # make a Polygon
-   Poly <- sp::Polygon(bbp)
+   Poly <- sp::Polygon(bb)
    if (output_class == 'Polygon') return(Poly)
    # make into Polygons
    Polys <- sp::Polygons(list(Poly), id)
    if (output_class == 'Polygons') return(Polys)
-   SpatialPolygons(list(Polys), proj4string = CRS(projstring))
+   sp::SpatialPolygons(list(Polys), proj4string = sp::CRS(projstring))
 }
 
 #' Extract a matrix of data from a SPNCRefClass of raster flavor

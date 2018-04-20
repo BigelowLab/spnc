@@ -4,5 +4,5 @@
 #'
 #' @name spnc-package
 #' @docType package
-#' @import methods
+#' @import methods rgdal sp ncdf4 raster
 NULL

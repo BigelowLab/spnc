@@ -189,13 +189,13 @@ NAMANLRefClass$methods(
 #' @return a \code{raster::brick} or \code{raster::layer} object or NULL
 NULL
 NAMANLRefClass$methods(
-   get_raster = function(what = .self$VARS[1], layer = 1, bb = .self$BB,
-      crs = "+proj=longlat +datum=WGS84", flip = FALSE, time_fmt = "D%Y%j"){
+   get_raster = function(what = .self$VARS[1], bb = .self$BB,
+      crs = "+proj=longlat +datum=WGS84", flip = FALSE, time_fmt = "D%Y%j", ...){
 
       if (!all(what %in% .self$VARS))
          stop("one or more requested variable(s) not in data:", paste(what, collapse = "\n"))
          
-      R <- NAMANL_get_raster(.self, what=what, layer = layer, bb = bb,
+      R <- NAMANL_get_raster(.self, what=what, bb = bb,
          crs = crs, flip = flip, time_fmt = time_fmt)
       return(R)
    }) # NAMANL_get_raster
@@ -237,6 +237,7 @@ NAMANLRefClass$methods(
          bb = c(range(xx), range(yy)) )
    }) # subset_bbox
 
+
 #' Get a raster for NAMANLRefClass
 #' 
 #' @export
@@ -249,69 +250,59 @@ NAMANLRefClass$methods(
 #' @param flip logical if TRUE then flip the raster in the y direction
 #' @param time_fmt if multiple time layers are returned, this controls the layer names
 #' @return a \code{raster::brick} or \code{raster::layer} object or NULL
-NAMANL_get_raster <- function(NC, what = NC$VARS[1], layer = 1, bb = NC$BB,
-      crs = "+proj=longlat +datum=WGS84", flip = FALSE, time_fmt = "D%Y%j"){
+NAMANL_get_raster <- function(NC, what = NC$VARS[1], bb = NC$BB,
+    crs = "+proj=longlat +datum=WGS84", flip = FALSE, time_fmt = "D%Y%j", ...){
    
-   stopifnot(inherits(NC, "NAMANLRefClass"))
-   subnav <- NC$subset_bbox(bb)
-   ext <- NC$get_extent(bb = subnav[['bb']])
-   
-   
-   x <- ncdf4::ncvar_get(NC$NC, what[1])
-   R <- raster::raster(t(x), template = NC$lccR)
-   R <- raster::projectRaster(from = R, to = NC$longlatR)
-   R <- raster::crop(R, bb)
-   
-   
-   
-   ##R <- raster::raster(nrow = subnav[['count']][2], 
-   ##   ncol = subnav[['count']][1],  ext = ext, crs = crs) 
-   #R <- NC$longlatR
-   #
-   #if (NC$flavor[['local']] == TRUE){
-   #   
-   #   x <- ncdf4::ncvar_get(NC$NC, what[1], 
-   #         start = subnav[['start']], 
-   #         count = subnav[['count']] )
-   #         
-   #   R <- raster::raster(t(x), template = R)
-   #   
-   #} else {
-   #
-   #   getOneVar <- function(vname, NC, subnav,
-   #      crs = "+proj=longlat +datum=WGS84"){
-   #      ncdf4::ncvar_get(NC, vname, 
-   #         start = c(subnav[['start']], layer[1]), 
-   #         count = c(subnav[['count']], 1) )
-   #   }
-   #   getOneLayer <- function(layer, NC, subnav, what = names(NC[['var']])[[1]],
-   #      crs = "+proj=longlat +datum=WGS84"){
-   #      ncdf4::ncvar_get(NC, what, 
-   #         start = c(subnav[['start']]), 
-   #         count = c(subnav[['count']]) )
-   #   }
-   #   
-   #   
-   #   if (length(what) > 1){   
-   #      X <- lapply(what, getOneVar, NC$NC, subnav, crs = crs, layer = layer[1] )
-   #      for (w in names(X)) R <- raster::addLayer(R, 
-   #         raster::raster(t(X[[w]]), template = R))
-   #      names(R) <- what
-   #   } else {
-   #      X <- lapply(layer, getOneLayer, NC$NC, subnav, crs = crs, what = what[1]) 
-   #      for (r in X) R <- raster::addLayer(R, 
-   #         raster::raster(t(r), template = R))
-   #      if (length(NC$TIME) > 1){
-   #         names(R) <- format(NC$TIME[layer], time_fmt)
-   #      } else {
-   #         names(R) <- paste("layer", layer, sep = "_")
-   #      } 
-   #   } # multiple variable?
-   #
-   #} # local or OpenDAP?
-   
-   if (flip) R <- raster::flip(R,"y")
-   
-   return(R)
+    stopifnot(inherits(NC, "NAMANLRefClass"))
+    
+    subnav <- NC$subset_bbox(bb)
+    ext <- NC$get_extent(bb = subnav[['bb']])
+    
+    vd <- ncvardim_get(NC$NC)[[what]]
+    ix <- names(vd) %in% c('x','y')
+    vd <- vd[!ix]
+    p <- list(...)
+
+    # determine which are missing
+    ip <- names(vd) %in% names(p)
+    names(ip) <- names(vd)
+    
+    # for each required element in p named n
+    # if (ip[n] == TRUE)
+    #    if (TIME)
+    #        convert to index via POSIXct or index
+    #    else
+    #        covert to index via indexing only
+    #    start = coerce_within(index)[[1]]
+    #    count = length(index)
+    
+    P <- vector(mode = 'list', length = length(ip))
+    for (n in names(ip)){
+        if (ip[[n]]){
+            if(grepl('time', n, fixed = TRUE)){
+                if(inherits(p[[n]], 'POSIXct')){
+                    ix <- find_interval(p[[n]], NC$TIME)
+                } else {
+                    ix <- p[[n]]
+                }
+            } else {
+                
+            }# time?
+        
+        }
+    
+    }
+       
+    
+    if(TRUE) return(list(vd=vd, p=p, subnav = subnav))
+    
+    x <- ncdf4::ncvar_get(NC$NC, what[1])
+    R <- raster::raster(t(x), template = NC$lccR)
+    R <- raster::projectRaster(from = R, to = NC$longlatR)
+    R <- raster::crop(R, bb)
+    
+    if (flip) R <- raster::flip(R,"y")
+    
+    return(R)
 }
 

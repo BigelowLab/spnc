@@ -13,6 +13,7 @@ SPNCRefClass <- setRefClass("SPNCRefClass",
    fields = list(
       flavor = 'list',# source=path, type=raster|point, local=logical
       NC = 'ANY',          # the ncdf4 class object
+      GATTS = 'ANY',       # ncdf4 global attributes if any
       BB = 'numeric',      # the 4 element bounding box
       DIMS = 'numeric',    # the dimensions
       VARS = 'character',  # the variable names
@@ -45,9 +46,11 @@ SPNCRefClass <- setRefClass("SPNCRefClass",
       # init is a bit more specific and may be overwriten by subclasses
       # in here we deal with extracting from the ncdf resource
       init = function(nc){
+         .self$field("GATTS", .self$get_global_atts())
          .self$field("DIMS", ncdim_get(nc))
          .self$field("VARS", names(nc[['var']]))
          .self$field("STEP", .self$step()) 
+         
          e <- .self$get_extent()
          #.self$BB <- raster::as.vector(e) # c(e@xmin, e@xmax, e@ymin, e@ymax)
          .self$BB <- c(e@xmin, e@xmax, e@ymin, e@ymax)
@@ -528,10 +531,10 @@ SPNC <- function(nc, bb = NULL, nc_verbose = FALSE, n_tries = 3, ...){
          nc <- try(ncdf4::nc_open(path, verbose = nc_verbose))
          if (inherits(nc, 'try-error')){
             if (i < n_tries) {
-               flush.console()
+               utils::flush.console()
                cat(sprintf("  attempt %i failed, trying again\n", i))
             } else {
-               flush.console()
+               utils::flush.console()
                cat("  ***\nexhausted permitted tries, returning NULL\n  ***\n")
             }
             nc <- NULL
@@ -553,6 +556,7 @@ SPNC <- function(nc, bb = NULL, nc_verbose = FALSE, n_tries = 3, ...){
       'narr' = NARRRefClass$new(nc, bb = bb, ...),
       'namanl' = NAMANLRefClass$new(nc, bb = bb, ...),
       'ncep' = NCEPRefClass$new(nc, bb = bb, ...),
+      'bsw' = BlendedSeaWindsRefClass$new(nc, bb, ...),
       SPNCRefClass$new(nc, bb = bb, ...))
    
    invisible(X)

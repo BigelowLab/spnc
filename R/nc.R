@@ -81,7 +81,8 @@ nctime_get <- function(NC, name = 'time', as_POSIXct = TRUE){
       u <- NC[["dim"]][['time']][['units']]
       
       if (grepl(" since ", u, fixed = TRUE)){
-         secsperday <- 24 * 60 * 60
+         secsperhour <- 60 * 60
+         secsperday <- 24 * secsperhour
          spaces <- gregexpr(" since ", u, fixed = TRUE)[[1]]
          incr <- substring(u, 1, spaces[1]-1)
          dt <- substring(u, spaces[1] + attr(spaces, 'match.length'))
@@ -89,6 +90,7 @@ nctime_get <- function(NC, name = 'time', as_POSIXct = TRUE){
          v <- switch(incr,
             "days" =  t0 + (v * secsperday),
             "seconds" = t0 + v,
+            "hours" = t0 + (v * secsperhour),
             t0 + v)
       } else {
          cat("nctime_get: unknown time format for conversion to POSIXct\n")

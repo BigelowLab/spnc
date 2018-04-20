@@ -4,11 +4,11 @@
 \alias{L3SMI_get_raster}
 \title{Get a raster for L3SMIRefClass}
 \usage{
-L3SMI_get_raster(NC, what = NC$VARS[1], layer = 1, bb = NC$BB,
+L3SMI_get_raster(X, what = X$VARS[1], layer = 1, bb = X$BB,
   crs = "+proj=longlat +datum=WGS84", flip = FALSE, time_fmt = "D\%Y\%j")
 }
 \arguments{
-\item{NC}{L3SMIRefClass object}
+\item{X}{L3SMIRefClass object}
 
 \item{what}{character one or more variable names or variable indices}
 

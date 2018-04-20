@@ -1,5 +1,5 @@
 Package: spnc
-Title: A simplified interface between spatial classes and NetCDF data sources.
+Title: A simplified interface between spatial classes and NetCDF data sources
 Description: Provides a uniform interface for extracting spatial data types from
     various NetCDF sources.
 Version: 0.1
@@ -7,6 +7,7 @@ Depends:
     R (>= 3.0)
 Imports:
     methods,
+    rgdal,
     sp,
     ncdf4,
     raster
@@ -15,6 +16,7 @@ Author: Ben Tupper <btupper@bigelow.org>
 License: MIT + file LICENSE
 Collate:
     'SPNC.R'
+    'BlendedSeaWindRefClass.R'
     'CPCUGBDP.R'
     'L3SMI.R'
     'MURSST.R'

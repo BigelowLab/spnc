@@ -169,7 +169,7 @@ OISST_get_raster <- function(NC, what = NC$VARS[1], time = 1, bb = NC$BB,
          snav[['count']][['time']] <- length(tix)
          x <- ncdf4::ncvar_get(NC$NC, w, start = c(snav[['start']]), count = c(snav[['count']]) )
          if (length(dim(x)) == 3){
-            for(i in seq_len(dim(x)[3])) R <- addLayer(R, raster::raster(t(x[,,i]), template = R))
+            for(i in seq_len(dim(x)[3])) R <- raster::addLayer(R, raster::raster(t(x[,,i]), template = R))
          } else {
             R <- raster::addLayer(R, raster::raster(t(x), template = R))
          }

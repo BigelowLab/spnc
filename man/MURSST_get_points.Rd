@@ -13,6 +13,10 @@ MURSST_get_points(NC, x, y = NULL, what = NC$VARS[1], layer = 1)
 or a data.frame or list with x,y elements}
 
 \item{y}{numeric vector of lattitude points or NULL}
+
+\item{what}{character one or more variable names or variable indices}
+
+\item{layer}{the layer index}
 }
 \value{
 numeric vector of values

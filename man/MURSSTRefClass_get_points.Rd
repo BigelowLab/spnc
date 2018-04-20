@@ -10,6 +10,8 @@ or a data.frame or list with x,y elements}
 \item{y}{numeric vector of lattitude points or NULL}
 
 \item{what}{character one or more variable names or variable indices}
+
+\item{layer}{numeric layer index}
 }
 \value{
 numeric vector of values
