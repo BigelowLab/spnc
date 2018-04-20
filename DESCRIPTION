@@ -12,7 +12,7 @@ Imports:
     raster
 Maintainer: Ben Tupper <btupper@bigelow.org>
 Author: Ben Tupper <btupper@bigelow.org>
-License: GPL (>= 2)
+License: MIT + file LICENSE
 Collate:
     'SPNC.R'
     'CPCUGBDP.R'
