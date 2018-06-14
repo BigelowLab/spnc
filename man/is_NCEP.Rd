@@ -15,4 +15,3 @@ logical
 \description{
 Test if an NCDF contains NCEP/NMC data.
 }
-

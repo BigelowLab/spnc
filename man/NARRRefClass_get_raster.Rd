@@ -28,4 +28,3 @@ a \code{raster::RasterBrick} or \code{raster::RasterLayer} object or NULL
 \description{
 Retrieve a raster, possibly a cropped
 }
-

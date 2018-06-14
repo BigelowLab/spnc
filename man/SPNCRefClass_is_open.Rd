@@ -9,4 +9,3 @@ logical
 \description{
 Test if the ncdf4 path is open
 }
-

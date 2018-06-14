@@ -15,4 +15,3 @@ a named vector of dimesnions
 \description{
 Retrieve a vector of dimensions
 }
-

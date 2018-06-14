@@ -14,4 +14,3 @@ Get the step size (resolution) as a guess - the space between the first
 lon and lat values.  Subclasses with unambiguous steps sizes, like L3SMI and  
 MURSST, should override this method.
 }
-

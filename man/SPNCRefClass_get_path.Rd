@@ -14,4 +14,3 @@ a \code{SpatialLinesDataFrame} or NULL
 \description{
 Get path (line) data
 }
-

@@ -15,4 +15,3 @@ logical
 \description{
 Test if an NCDF contains Blended Sea Winds data.
 }
-

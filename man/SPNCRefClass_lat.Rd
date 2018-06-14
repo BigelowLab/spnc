@@ -16,4 +16,3 @@ numeric vector or NULL
 \description{
 Get the latitude locations
 }
-

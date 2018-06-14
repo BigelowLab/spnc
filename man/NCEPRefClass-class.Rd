@@ -2,8 +2,8 @@
 % Please edit documentation in R/NCEP.R
 \docType{class}
 \name{NCEPRefClass-class}
-\alias{NCEPRefClass}
 \alias{NCEPRefClass-class}
+\alias{NCEPRefClass}
 \title{A subclass of SPNCRefClass for NCEP/NCM}
 \description{
 This NetCDF data is projected and can be ready by the \code{raster} package. Unlike
@@ -15,4 +15,5 @@ other members of the SPNCRefClass, this class stores the data as raster.  The ge
 \describe{
 \item{\code{R}}{a Raster* class object}
 }}
+
 

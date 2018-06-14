@@ -20,4 +20,3 @@ named vector of global attributes
 \description{
 Retrieve a named list of global attributes
 }
-

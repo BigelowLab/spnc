@@ -21,4 +21,3 @@ a numeric matrix or NULL
 \description{
 Extract a matrix of data from a SPNCRefClass of raster flavor
 }
-

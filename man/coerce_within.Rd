@@ -17,4 +17,3 @@ a numeric vector same length as x with all values within bounds b
 \description{
 Coerce values of x two be within the range of the bounds b.
 }
-

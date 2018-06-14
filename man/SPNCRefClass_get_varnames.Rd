@@ -9,4 +9,3 @@ character vector or NULL
 \description{
 Retrieve the variable names
 }
-

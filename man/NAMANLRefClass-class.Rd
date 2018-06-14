@@ -2,8 +2,8 @@
 % Please edit documentation in R/NAMANL.R
 \docType{class}
 \name{NAMANLRefClass-class}
-\alias{NAMANLRefClass}
 \alias{NAMANLRefClass-class}
+\alias{NAMANLRefClass}
 \title{A subclass of SPNCRefClass for NAM-ANL}
 \description{
 A subclass of SPNCRefClass for NAM-ANL
@@ -15,4 +15,5 @@ A subclass of SPNCRefClass for NAM-ANL
 
 \item{\code{mercator}}{a Raster* class object}
 }}
+
 

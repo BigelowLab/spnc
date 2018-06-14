@@ -27,4 +27,4 @@ Collate:
     'SPNC-package.R'
     'misc.R'
     'nc.R'
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1

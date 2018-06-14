@@ -14,4 +14,3 @@ a \code{SpatialPointsDataFrame} or NULL
 \description{
 Get point data
 }
-

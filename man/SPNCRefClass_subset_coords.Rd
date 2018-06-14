@@ -15,4 +15,3 @@ a list of \code{start} indices in x and y, \code{counts} in x and y and
 \description{
 Retrieve the subset coordinates
 }
-

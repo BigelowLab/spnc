@@ -25,4 +25,3 @@ a \code{raster::brick} or \code{raster::layer} object or NULL
 \description{
 Get a raster
 }
-

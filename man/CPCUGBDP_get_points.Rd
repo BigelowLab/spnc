@@ -24,4 +24,3 @@ numeric vector of values
 \description{
 Get points for CPCUGBDPRefClass
 }
-

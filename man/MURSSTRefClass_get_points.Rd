@@ -19,4 +19,3 @@ numeric vector of values
 \description{
 Get points
 }
-

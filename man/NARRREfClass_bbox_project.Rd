@@ -23,4 +23,3 @@ a \code{raster::brick} or \code{raster::layer} object or NULL
 \description{
 Convert bb to longlat
 }
-

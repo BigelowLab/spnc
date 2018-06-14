@@ -9,4 +9,3 @@ logical
 \description{
 Test if this is a local file
 }
-

@@ -9,4 +9,3 @@ logical
 \description{
 Close the ncdf4 object if it is not closed already
 }
-

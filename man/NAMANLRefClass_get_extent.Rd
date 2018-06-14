@@ -16,4 +16,3 @@ a raster::Extent object
 \description{
 Compute extent given a bounding box
 }
-

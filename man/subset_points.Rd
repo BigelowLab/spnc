@@ -23,4 +23,3 @@ a list of start/count elements, one per xy input.  For inputs that
 \description{
 Converts Lon/Lat to start and count suitable for extracting points
 }
-

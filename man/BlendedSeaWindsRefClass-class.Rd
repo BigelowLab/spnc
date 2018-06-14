@@ -2,8 +2,8 @@
 % Please edit documentation in R/BlendedSeaWindRefClass.R
 \docType{class}
 \name{BlendedSeaWindsRefClass-class}
-\alias{BlendedSeaWindsRefClass}
 \alias{BlendedSeaWindsRefClass-class}
+\alias{BlendedSeaWindsRefClass}
 \title{A subclass of SPNCRefClass for Blended Sea Winds}
 \description{
 A subclass of SPNCRefClass for Blended Sea Winds

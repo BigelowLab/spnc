@@ -15,4 +15,3 @@ logical
 \description{
 Open the ncdf4 object
 }
-

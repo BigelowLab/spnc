@@ -12,4 +12,3 @@ a named list of global attributes or NULL
 \description{
 Get global attributes
 }
-

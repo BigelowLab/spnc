@@ -25,4 +25,3 @@ a SPNCRefClass object or subclass or NULL
 \description{
 A function to create an SPNCRefClass or subclass reference
 }
-

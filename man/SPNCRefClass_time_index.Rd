@@ -19,4 +19,3 @@ Compute time indices (which must be contiguous) from POSIXt, Date or index.
 An warning is thrown if the dates requested are not contiguous.  If the object
 does not have TIME element then 1 is returned.
 }
-

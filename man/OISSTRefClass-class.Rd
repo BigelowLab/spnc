@@ -2,8 +2,8 @@
 % Please edit documentation in R/OISST.R
 \docType{class}
 \name{OISSTRefClass-class}
-\alias{OISSTRefClass}
 \alias{OISSTRefClass-class}
+\alias{OISSTRefClass}
 \title{A subclass of SPNCRefClass for NOAA Optimum Interpolation (OI) Sea Surface Temperature \url{http://www.esrl.noaa.gov/psd/data/gridded/data.noaa.oisst.v2.html}}
 \description{
 Lon and Lat appear to be cell centers with 0.25 x 0.25 degree resolution

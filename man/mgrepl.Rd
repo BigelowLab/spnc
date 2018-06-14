@@ -20,4 +20,3 @@ logical vector of matches where at least one element of \code{pattern}
 \description{
 Perform grepl on multiple patterns; it's like OR-ing successive grepl statements.
 }
-

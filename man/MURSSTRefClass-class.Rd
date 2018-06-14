@@ -2,8 +2,8 @@
 % Please edit documentation in R/MURSST.R
 \docType{class}
 \name{MURSSTRefClass-class}
-\alias{MURSSTRefClass}
 \alias{MURSSTRefClass-class}
+\alias{MURSSTRefClass}
 \title{A subclass of SPNCRefClass for Multi-scale Ultra-high Resolution Sea Surface Temperature \url{http://mur.jpl.nasa.gov/}}
 \description{
 A subclass of SPNCRefClass for Multi-scale Ultra-high Resolution Sea Surface Temperature \url{http://mur.jpl.nasa.gov/}

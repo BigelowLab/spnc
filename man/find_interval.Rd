@@ -25,4 +25,3 @@ When \code{vec} is in ascending order we use \code{base::findInterval()}, but
 when \code{vec} is in descending order we implement an adaptation of the 
 \code{locate()} function from Numerical Recipes for C \url{http://apps.nrbook.com/c/index.html}
 }
-

@@ -16,4 +16,3 @@ a list of start/count elements, one per xy input.  For inputs that
 \description{
 Compute indicies (start and count) for individual [lon,lat] points
 }
-

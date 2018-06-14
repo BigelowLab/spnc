@@ -12,4 +12,3 @@ These may be signed for descending values of lon and or lat
 Get the step size (resolution) as a guess - the space between the first 
 on and lat values.
 }
-

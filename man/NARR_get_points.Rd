@@ -24,4 +24,3 @@ as specified by \code{raster::extract()}
 \description{
 Get data values by specifying long/lat locations
 }
-

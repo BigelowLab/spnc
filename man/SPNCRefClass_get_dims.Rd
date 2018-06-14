@@ -9,4 +9,3 @@ a named numeric vector of dimensions or NULL
 \description{
 Retrieve a named vector of dimensions
 }
-

@@ -7,4 +7,3 @@
 \description{
 A simplified interface between spatial classes and NetCDF data sources.
 }
-

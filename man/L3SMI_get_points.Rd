@@ -22,4 +22,3 @@ numeric vector of values
 \description{
 Get points for L3SMIRefClass
 }
-

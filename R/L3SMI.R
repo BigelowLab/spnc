@@ -48,8 +48,9 @@ L3SMIRefClass <- setRefClass("L3SMIRefClass",
 NULL
 L3SMIRefClass$methods(
    step = function(){
-      c((.self$GATTS[['easternmost_longitude']] - .self$GATTS[['westernmost_longitude']])/.self$DIMS[['lon']],
-        (.self$GATTS[['northernmost_latitude']] - .self$GATTS[['southernmost_latitude']])/.self$DIMS[['lat']])
+      c(.self$GATTS$longitude_step, .self$GATTS$latitude_step) 
+      #c((.self$GATTS[['easternmost_longitude']] - .self$GATTS[['westernmost_longitude']])/.self$DIMS[['lon']],
+      #  (.self$GATTS[['northernmost_latitude']] - .self$GATTS[['southernmost_latitude']])/.self$DIMS[['lat']])
    })
    
 
@@ -104,32 +105,36 @@ L3SMIRefClass$methods(
 NULL
 L3SMIRefClass$methods(
    subset_bbox = function(bb = NULL){
-      llon <- .self$lon("leading")
-      llat <- .self$lat("leading")
-      if (is.null(bb)){
-         return(
-            list(start = c(lon=1,lat=1), count = c(lon=length(llon), lat=length(llat)),
-               bb = .self$get_extent() ) 
-            )
-      }
       
-      ix <- range(spnc::find_interval(bb[0:2], llon))
-      iy <- range(spnc::find_interval(bb[3:4], llat))
-
-      # make sure they fit within the dims of the data
-      ix <- spnc::coerce_within(ix, c(1, length(llon)))
-      iy <- spnc::coerce_within(iy, c(1, length(llat)))
-      s <- .self$STEP
-      #xx <- llon[ix] + if (s[1] < 0) c(s[1],0) else c(0, s[1])
-      #yy <- llat[iy] + if (s[2] < 0) c(s[2],0) else c(0, s[2]) 
-      
-      xx <- range(.self$lon("center")[ix])
-      yy <- range(.self$lat("center")[iy])
-      
-      list(start = c(lon=ix[1], lat=iy[1]), 
-         count = c(lon=ix[2]-ix[1]+1, lat=iy[2]-iy[1]+1),
-         bb = c(xx, yy),
-         ext = c(xx + c(-0.5,0.5)*s[1], yy + c(-0.5, 0.5)*s[2]) )
+      if (is.null(bb)) bb <- .self$get_extent() 
+      return(nc_subset(.self$NC, bb = bb, step = .self$STEP))
+       
+      # llon <- .self$lon("leading")
+      # llat <- .self$lat("leading")
+      # if (is.null(bb)){
+      #    return(
+      #       list(start = c(lon=1,lat=1), count = c(lon=length(llon), lat=length(llat)),
+      #          bb = .self$get_extent() ) 
+      #       )
+      # }
+      # 
+      # ix <- range(spnc::find_interval(bb[0:2], llon))
+      # iy <- range(spnc::find_interval(bb[3:4], llat))
+      # 
+      # # make sure they fit within the dims of the data
+      # ix <- spnc::coerce_within(ix, c(1, length(llon)))
+      # iy <- spnc::coerce_within(iy, c(1, length(llat)))
+      # s <- .self$STEP
+      # #xx <- llon[ix] + if (s[1] < 0) c(s[1],0) else c(0, s[1])
+      # #yy <- llat[iy] + if (s[2] < 0) c(s[2],0) else c(0, s[2]) 
+      # 
+      # xx <- range(.self$lon("center")[ix])
+      # yy <- range(.self$lat("center")[iy])
+      # 
+      # list(start = c(lon=ix[1], lat=iy[1]), 
+      #    count = c(lon=ix[2]-ix[1]+1, lat=iy[2]-iy[1]+1),
+      #    bb = c(xx, yy),
+      #    ext = c(xx + c(-0.5,0.5)*s[1], yy + c(-0.5, 0.5)*s[2]) )
    }) # subset_bbox
    
    

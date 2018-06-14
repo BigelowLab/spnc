@@ -15,4 +15,3 @@ a named list of variable dimension vectors
 \description{
 Retrieve a list of dimension vectors, one for each variable
 }
-

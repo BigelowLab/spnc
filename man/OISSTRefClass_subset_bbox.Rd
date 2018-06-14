@@ -20,4 +20,3 @@ Craft subset indices into a ncdf array
 \seealso{
 \url{http://r.789695.n4.nabble.com/Lat-Lon-NetCDF-subset-td3394326.html}
 }
-

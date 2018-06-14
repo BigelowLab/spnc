@@ -15,4 +15,3 @@ a named vector variable names
 \description{
 Retrieve a vector of variable names
 }
-

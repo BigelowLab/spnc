@@ -12,4 +12,3 @@ Get the nominal step size (resolution) in km
 \seealso{
 http://www.nco.ncep.noaa.gov/pmb/docs/on388/tableb.html#GRID221
 }
-

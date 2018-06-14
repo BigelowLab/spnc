@@ -15,4 +15,3 @@ numeric bounding box vector
 \description{
 Bounding boxes are 4 element vectors of [left, right, bottom, top]
 }
-

@@ -24,4 +24,3 @@ it is impotant to know that the order of rasters is each time for each variable
 requested.  Thus requesting variables 'v1', 'v2', 'v3' at times t1 and t2
 results in a stack with v1-t1, v1-t2, v2-t1, v2-t2, v3-t1, v3-t2 order.
 }
-

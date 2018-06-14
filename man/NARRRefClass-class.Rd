@@ -2,17 +2,17 @@
 % Please edit documentation in R/NARR.R
 \docType{class}
 \name{NARRRefClass-class}
-\alias{NARRRefClass}
 \alias{NARRRefClass-class}
+\alias{NARRRefClass}
 \title{A subclass of SPNCRefClass for [NARR](http://www.esrl.noaa.gov/psd/data/gridded/data.narr.html) NCEP North American Regional Reanalysis}
 \description{
 This NetCDF data is projected and can be ready by the \code{raster} package. Unlike
 other members of the SPNCRefClass, this class stores the data as raster.  The get
 \code{get_raster()} and \code{get_points()} functions are still exposed for consistency.
 }
+
 \seealso{
 \url{http://www.esrl.noaa.gov/psd/data/narr/format.html}
 
 \url{http://www.esrl.noaa.gov/psd/data/gridded/data.narr.html}
 }
-

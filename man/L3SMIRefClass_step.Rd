@@ -9,4 +9,3 @@ two element numeric vector of step size in x and y or NULL.
 \description{
 Get the step size (resolution) as reported in the global attributes.
 }
-

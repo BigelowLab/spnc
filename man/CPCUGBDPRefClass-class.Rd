@@ -2,8 +2,8 @@
 % Please edit documentation in R/CPCUGBDP.R
 \docType{class}
 \name{CPCUGBDPRefClass-class}
-\alias{CPCUGBDPRefClass}
 \alias{CPCUGBDPRefClass-class}
+\alias{CPCUGBDPRefClass}
 \title{A subclass of SPNCRefClass for CPC .25x.25 Daily US Unified Gauge-Based Analysis of Precipitation \url{http://www.esrl.noaa.gov/psd/data/gridded/data.unified.daily.conus.html}}
 \description{
 Lat is an ascending order [-90, 90] and while Lon in mapped to [0,360] 

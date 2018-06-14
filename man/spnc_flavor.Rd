@@ -20,4 +20,3 @@ return list of
 \description{
 Determine the type and source of the netcdf data
 }
-

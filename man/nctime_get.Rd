@@ -19,4 +19,3 @@ a numeric vector of timestamps (possibly POSIXct) or NULL if none
 \description{
 Retrieve a vector of timestamps for a multilayer NC object or NULL otherwise
 }
-

@@ -25,4 +25,3 @@ a \code{raster::brick} or \code{raster::layer} object or NULL
 Get one or more variables of one or more layers (time) By default just the 
 first layer (time) is returned.
 }
-

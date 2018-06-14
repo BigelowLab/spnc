@@ -18,4 +18,3 @@ the ncdf file.  For ncdf4 the order should be X,Y,Z,T (which might be
 lon, lat, zlev, time, but not necessarily those names).  Honestly, this
 probably should not even be a method - but use at your own risk/pain.
 }
-

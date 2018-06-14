@@ -2,8 +2,8 @@
 % Please edit documentation in R/L3SMI.R
 \docType{class}
 \name{L3SMIRefClass-class}
-\alias{L3SMIRefClass}
 \alias{L3SMIRefClass-class}
+\alias{L3SMIRefClass}
 \title{A subclass of SPNCRefClass for OBPG L3 Standard Mapped Image}
 \description{
 A subclass of SPNCRefClass for OBPG L3 Standard Mapped Image

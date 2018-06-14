@@ -2,8 +2,8 @@
 % Please edit documentation in R/SPNC.R
 \docType{class}
 \name{SPNCRefClass-class}
-\alias{SPNCRefClass}
 \alias{SPNCRefClass-class}
+\alias{SPNCRefClass}
 \title{An object that connects to NetCDF (file or OpeNDAP) using ncdf4}
 \description{
 An object that connects to NetCDF (file or OpeNDAP) using ncdf4
@@ -27,4 +27,5 @@ An object that connects to NetCDF (file or OpeNDAP) using ncdf4
 
 \item{\code{TIME}}{possibly a vector of times}
 }}
+
 

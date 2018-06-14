@@ -15,4 +15,3 @@ numeric vector
 \description{
 Convert [0,360] longitudes to [-180, 180]
 }
-

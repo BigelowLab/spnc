@@ -19,4 +19,3 @@ as specified by \code{raster::extract()}
 \description{
 Retrieve points of data
 }
-
