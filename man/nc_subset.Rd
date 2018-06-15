@@ -2,8 +2,8 @@
 % Please edit documentation in R/nc.R
 \name{nc_subset}
 \alias{nc_subset}
-\title{Compute subset coordinates given a bounding box - suitable for use with 
-\code{ncvar_get()}.  This is sort of a generic function that may not work for 
+\title{Compute subset coordinates given a bounding box - suitable for use with
+\code{ncvar_get()}.  This is sort of a generic function that may not work for
 all NetCDF files. Coordinates within the files are assumed to be pixel centers.}
 \usage{
 nc_subset(NC, bb = c(-77, -51.5, 37.9, 56.7), step = nc_step(NC),
@@ -16,11 +16,11 @@ nc_subset(NC, bb = c(-77, -51.5, 37.9, 56.7), step = nc_step(NC),
 
 \item{step}{one or two element numeric of the step size.}
 
-\item{dim_names}{a two element character vector providing the names of the 
+\item{dim_names}{a two element character vector providing the names of the
 x and y coordinates.  By default \code{c('lon', 'lat')}}
 }
 \value{
-a 5 element list of 
+a 5 element list of
  \itemize{
      \item{start a 2 element vector of indices to start}
      \item{count a 2 element vector number of columns/rows}
@@ -30,7 +30,7 @@ a 5 element list of
   }
 }
 \description{
-Pixel center coordinates are typically specified within the 'dim' attribute in the 
-ncdf4 object.  Step size between pixel centers is taken to be the mean for 
+Pixel center coordinates are typically specified within the 'dim' attribute in the
+ncdf4 object.  Step size between pixel centers is taken to be the mean for
 all pixels by default, but this can be overridden.
 }

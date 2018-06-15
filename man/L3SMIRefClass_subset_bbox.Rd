@@ -7,9 +7,9 @@
 \item{bb}{numeric, four element bounding box [left, right, bottom, top]}
 }
 \value{
-a list of 
+a list of
 \itemize{
- \item{start indices in x and y} 
+ \item{start indices in x and y}
  \item{counts in x and y}
  \item{bb vector of [left, right, bottom, top] pixel centers}
  \item{ext extent vector [left, right, bottom, top] pixel outer edges}

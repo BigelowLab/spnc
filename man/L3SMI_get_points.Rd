@@ -4,12 +4,12 @@
 \alias{L3SMI_get_points}
 \title{Get points for L3SMIRefClass}
 \usage{
-L3SMI_get_points(NC, x, y = NULL, what = NC$VARS[1])
+L3SMI_get_points(X, x, y = NULL, what = X$VARS[1])
 }
 \arguments{
-\item{NC}{L3SMIRefClass object}
+\item{X}{L3SMIRefClass object}
 
-\item{x}{numeric, vector of longitude points or, if y is NULL, a matrix [x,y] 
+\item{x}{numeric, vector of longitude points or, if y is NULL, a matrix [x,y]
 or a data.frame or list with x,y elements}
 
 \item{y}{numeric vector of lattitude points or NULL}

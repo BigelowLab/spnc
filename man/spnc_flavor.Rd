@@ -10,7 +10,7 @@ spnc_flavor(x)
 \item{x}{the netcdf4 or SPNCRefClass object}
 }
 \value{
-return list of 
+return list of
  \itemize{
    \item source character of 'MURSST', 'OISST', etc. "" means unknown
    \item type character of 'raster', 'points', etc. "" means unknown

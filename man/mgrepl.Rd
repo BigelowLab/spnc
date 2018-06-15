@@ -14,7 +14,7 @@ mgrepl(pattern, x, ...)
 \item{...}{further arguments for \code{grepl}}
 }
 \value{
-logical vector of matches where at least one element of \code{pattern} 
+logical vector of matches where at least one element of \code{pattern}
    is found in \code{x}
 }
 \description{

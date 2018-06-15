@@ -4,7 +4,7 @@
 \alias{L3SMIRefClass_get_points}
 \title{Get points}
 \arguments{
-\item{x}{numeric, vector of longitude points or, if y is NULL, a matrix [x,y] 
+\item{x}{numeric, vector of longitude points or, if y is NULL, a matrix [x,y]
 or a data.frame or list with x,y elements}
 
 \item{y}{numeric vector of lattitude points or NULL}

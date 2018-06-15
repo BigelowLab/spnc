@@ -2,7 +2,7 @@
 % Please edit documentation in R/SPNC.R
 \name{SPNCRefClass_get_raster}
 \alias{SPNCRefClass_get_raster}
-\title{Get one or more variables of one or more layers (time) By default just the 
+\title{Get one or more variables of one or more layers (time) By default just the
 first layer (time) is returned.}
 \arguments{
 \item{what}{character one or more variable names or variable indices}
@@ -22,6 +22,6 @@ to [-180, 180, -90, 90]}
 a \code{raster::brick} or \code{raster::layer} object or NULL
 }
 \description{
-Get one or more variables of one or more layers (time) By default just the 
+Get one or more variables of one or more layers (time) By default just the
 first layer (time) is returned.
 }

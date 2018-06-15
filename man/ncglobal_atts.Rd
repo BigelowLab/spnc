@@ -9,7 +9,7 @@ ncglobal_atts(NC, rm_pattern = "NC_GLOBAL.", fixed = TRUE)
 \arguments{
 \item{NC}{a ncdf4 object}
 
-\item{rm_pattern}{character a pattern of characters to remove from the 
+\item{rm_pattern}{character a pattern of characters to remove from the
 attribute names.  By default 'NC_GLOBAL.'.  Set to "" or NA to skip}
 
 \item{fixed}{logical by default TRUE but see \code{grepl}}

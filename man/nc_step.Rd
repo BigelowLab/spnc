@@ -10,7 +10,7 @@ nc_step(NC, dim_names = c("lon", "lat"))
 \arguments{
 \item{NC}{a ncdf4 class object}
 
-\item{dim_names}{a two element character vector providing the names of the 
+\item{dim_names}{a two element character vector providing the names of the
 x and y coordinates.  By default \code{c('lon', 'lat')}}
 }
 \value{

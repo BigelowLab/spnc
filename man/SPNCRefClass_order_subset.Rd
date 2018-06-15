@@ -3,7 +3,7 @@
 \name{SPNCRefClass_order_subset}
 \alias{SPNCRefClass_order_subset}
 \title{Order a subset coordinate system into the order matching that stored in
-the ncdf file.  For ncdf4 the order should be X,Y,Z,T (which might be 
+the ncdf file.  For ncdf4 the order should be X,Y,Z,T (which might be
 lon, lat, zlev, time, but not necessarily those names).  Honestly, this
 probably should not even be a method - but use at your own risk/pain.}
 \arguments{
@@ -14,7 +14,7 @@ the same list with elements of start and count properly ordered
 }
 \description{
 Order a subset coordinate system into the order matching that stored in
-the ncdf file.  For ncdf4 the order should be X,Y,Z,T (which might be 
+the ncdf file.  For ncdf4 the order should be X,Y,Z,T (which might be
 lon, lat, zlev, time, but not necessarily those names).  Honestly, this
 probably should not even be a method - but use at your own risk/pain.
 }

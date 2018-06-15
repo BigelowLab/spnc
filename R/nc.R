@@ -1,8 +1,165 @@
+#' Determine if cell locations are stored in ascending or descending order.
+#'
+#' @export
+#' @param   x   netcd4 or raster object
+#' @param   dir character either 'lon' or 'lat' (default)
+#' @return      logical, TRUE if the specified cell locations ascend in value
+ascends <- function(x, dir = 'lat'){
+    if (inherits(x, 'ncdf4')){
+        asc = diff(x$dim[[dir]]$vals[1:2]) > 0
+    } else {
+        asc = switch(dir,
+            'lon' = xFromCol(x, 1:2),
+            'lat' = yFromRow(x, 1:2))
+        asc = diff(asc) > 0
+    }
+    asc
+}
+
+#' Get a 2 element vector of [dx, dy] resolution
+#'
+#' @export
+#' @param   x   netcd4 or raster object
+#' @return      2 element numeric of resolution in [x,y]
+get_res <- function(x){
+    if (inherits(x, 'ncdf4')){
+        shape = get_shape(x)
+        aa = spnc::ncglobal_atts(x)
+        bb = unname(unlist(aa[c('westernmost_longitude', 'easternmost_longitude',
+                       'southernmost_latitude', 'northernmost_latitude') ]))
+        r = c((bb[2]-bb[1])/shape[1], (bb[4]-bb[3])/shape[2])
+    } else {
+        r = res(x)
+    }
+}
+
+#' Get a 2 element vector of [nx, ny] dimensions
+#'
+#' @export
+#' @param   x   netcd4 or raster object
+#' @return      a two element vector of [nx, ny]
+get_shape <- function(x){
+    if (inherits(x, 'ncdf4')){
+        r = c(x$dim$lon$len, x$dim$lat$len)
+    } else {
+        r = dim(x)
+    }
+}
+
+#' Get a vector of lon or lat cell locations
+#'
+#' @export
+#' @param x     netcd4 or raster object
+#' @param what  character either 'lon' or 'lat' (default)
+#' @return      a vector of the cell locations
+get_loc <- function(x, what = 'lon'){
+    if (inherits(x, 'ncdf4')){
+        #v   = x$dim[[what]]$vals
+        shape = get_shape(x)
+        aa = spnc::ncglobal_atts(x)
+        bb = unname(unlist(aa[c('westernmost_longitude', 'easternmost_longitude',
+                                'southernmost_latitude', 'northernmost_latitude') ]))
+        res = get_res(x)
+        v = switch(what[1],
+                'lon'  = seq(from = bb[1] + 0.5 * res[1],
+                             to = bb[2] - 0.5 * res[1],
+                             by = res[1]),
+                'lat'  = if(ascends(x))
+                            seq(from = bb[3] + 0.5 * res[2],
+                                to = bb[4] - 0.5 * res[2],
+                                by = res[2])
+                         else
+                            seq(from = bb[4] - 0.5 * res[2],
+                                to = bb[3] + 0.5 * res[2],
+                                by = -res[2])
+                        )
+    } else {
+        v  = switch(what[1],
+                    'lon' = raster::xFromCol(x, 1:ncol(x)),
+                    'lat' = raster::yFromRow(x, 1:nrow(x)) )
+    }
+    v
+}
+
+#' Generate the navigation elements required to subset an ncdf4 object.
+#' Returns a list of start indices and count and an adjusted bounding box
+#'
+#' @export
+#' @param r     raster object
+#' @param bb    a 4 element vector describing the bounding box [left, right, bottom, top]
+#' @return      a 3 element vector of start [ix,iy], count, [nx, ny], and
+#'    an adjusted bb [left, right, bottom, top] and ext (extent) same as bb
+nav_from_bb <- function(r, bb){
+
+    cr      = raster::crop(r, bb)
+    cx      = get_loc(cr, 'lon')
+    cy      = get_loc(cr, 'lat')
+    rx      = get_loc(r, 'lon')
+    ry      = get_loc(r, 'lat')
+    ix      = which.min(abs(rx - cx[1]))
+    iy      = which.min(abs(ry - cy[1]))
+
+    ext    = as.vector(extent(cr))
+    list(
+        start = c(ix,iy),
+        count = c(ncol(cr), nrow(cr)),
+        bb   = ext,
+        ext  = ext)
+}
+
+#' Create a raster template from the contents of a ncdf4 object
+#'
+#' @export
+#' @param   x ncdf4 object
+#' @param   proj CRS projection string
+#' @return  raster
+nc_template <- function(x,
+    proj = get_projection("longlat")){
+
+    xres    = get_res(x)
+    xshape  = get_shape(x)
+    xlon    =  get_loc(x, 'lon')
+    xlat    = get_loc(x, 'lat')
+
+    raster::raster(
+        xmn = min(xlon) - xres[1]/2,
+        xmx = max(xlon) + xres[1]/2,
+        ymn = min(xlat) - xres[2]/2,
+        ymx = max(xlat) + xres[2]/2,
+        ncol = xshape[1],
+        nrow = xshape[2],
+        crs = proj)
+}
+
+#' Crop a ncdf4 object
+#'
+#' @export
+#' @param   x ncdf4 object
+#' @param varname   character variable name 'sst' by default
+#' @param bb        4 element bounding box [left, right, bottom, top]
+#' @param template  raster template
+#' @return raster
+nc_crop <- function(x, varname = 'sst', bb = c(-180, 180, -90, 90),
+    template = nc_template(x)){
+    # ## S4 method for signature 'missing'
+    # raster(nrows=180, ncols=360, xmn=-180, xmx=180, ymn=-90, ymx=90,
+    #       crs, ext, resolution, vals=NULL)
+
+    nv = nav_from_bb(template, bb)
+    raster::raster(t(ncvar_get(NC, "sst", start = nv$start, count = nv$count)),
+        crs = raster::projection(template),
+        xmn = nv$bb[1], xmx = nv$bb[2],
+        ymn = nv$bb[3], ymx = nv$bb[4])
+}
+
+
+
+
 #' Retrieve a named list of global attributes
 #'
 #' @export
 #' @param NC a ncdf4 object
-#' @param rm_pattern character a pattern of characters to remove from the 
+#' @param rm_pattern character a pattern of characters to remove from the
 #'    attribute names.  By default 'NC_GLOBAL.'.  Set to "" or NA to skip
 #' @param fixed logical by default TRUE but see \code{grepl}
 #' @return named vector of global attributes
@@ -53,7 +210,7 @@ ncvardim_get <- function(NC){
          names(len) <- x[['name']]
          return(len)
       }
-      
+
       dims <- d[['dim']]
       sapply(dims, get_vardim_one)
    }
@@ -68,15 +225,15 @@ ncvardim_get <- function(NC){
 #' @param as_POSIXct logical, if TRUE then convert to POSIXct
 #' @return a numeric vector of timestamps (possibly POSIXct) or NULL if none
 nctime_get <- function(NC, name = 'time', as_POSIXct = TRUE){
-   
+
    d <- ncdim_get(NC)
    if (!("time" %in% names(d)) ) return(NULL)
-   
+
    v <- NC[["dim"]][['time']][['vals']]
-   
+
    if (as_POSIXct){
       u <- NC[["dim"]][['time']][['units']]
-      
+
       if (grepl(" since ", u, fixed = TRUE)){
          secsperhour <- 60 * 60
          secsperday <- 24 * secsperhour
@@ -91,7 +248,7 @@ nctime_get <- function(NC, name = 'time', as_POSIXct = TRUE){
             t0 + v)
       } else {
          cat("nctime_get: unknown time format for conversion to POSIXct\n")
-      }  
+      }
    }
    invisible(v)
 }
@@ -101,12 +258,13 @@ nctime_get <- function(NC, name = 'time', as_POSIXct = TRUE){
 #'
 #' @export
 #' @param NC a ncdf4 class object
-#' @param dim_names a two element character vector providing the names of the 
+#' @param dim_names a two element character vector providing the names of the
 #'   x and y coordinates.  By default \code{c('lon', 'lat')}
 #' @return a 2 element numeric of the mean step size - always positive
 nc_step <- function(NC,
     dim_names = c('lon','lat')){
-    
+
+
     xn <- dim_names[1]
     yn <- dim_names[2]
     x <- abs(c(mean(diff(NC$dim[[xn]]$vals)), mean(diff(NC$dim[[yn]]$vals))))
@@ -115,21 +273,21 @@ nc_step <- function(NC,
 }
 
 
-#' Compute subset coordinates given a bounding box - suitable for use with 
-#' \code{ncvar_get()}.  This is sort of a generic function that may not work for 
+#' Compute subset coordinates given a bounding box - suitable for use with
+#' \code{ncvar_get()}.  This is sort of a generic function that may not work for
 #' all NetCDF files. Coordinates within the files are assumed to be pixel centers.
 #'
-#' Pixel center coordinates are typically specified within the 'dim' attribute in the 
-#' ncdf4 object.  Step size between pixel centers is taken to be the mean for 
+#' Pixel center coordinates are typically specified within the 'dim' attribute in the
+#' ncdf4 object.  Step size between pixel centers is taken to be the mean for
 #' all pixels by default, but this can be overridden.
-#' 
+#'
 #' @export
 #' @param NC a ncdf4 class object
 #' @param bb the 4 element bounding box [left, right, bottom, top]
-#' @param step one or two element numeric of the step size. 
-#' @param dim_names a two element character vector providing the names of the 
+#' @param step one or two element numeric of the step size.
+#' @param dim_names a two element character vector providing the names of the
 #'   x and y coordinates.  By default \code{c('lon', 'lat')}
-#' @return a 5 element list of 
+#' @return a 5 element list of
 #'  \itemize{
 #'      \item{start a 2 element vector of indices to start}
 #'      \item{count a 2 element vector number of columns/rows}
@@ -147,7 +305,7 @@ nc_subset <- function(NC,
 
     xn <- dim_names[1]
     yn <- dim_names[2]
-    
+
     # some ncdf files have lat from south to north, other north to south
     ascends <- diff(NC$dim[[yn]]$vals[1:2]) > 0
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/misc.R
 \name{find_interval}
 \alias{find_interval}
-\title{A wrapper around base::findInterval() that allows decreasing values in the 
+\title{A wrapper around base::findInterval() that allows decreasing values in the
 value of the vector within which we wish to place values of x.}
 \usage{
 find_interval(x, vec, rightmost.closed = FALSE, all.inside = FALSE)
@@ -10,7 +10,7 @@ find_interval(x, vec, rightmost.closed = FALSE, all.inside = FALSE)
 \arguments{
 \item{x}{numeric values we wish to located within \code{vec}}
 
-\item{vec}{numeric vector of sorted values (ascending or descending order) 
+\item{vec}{numeric vector of sorted values (ascending or descending order)
 within which we wish to find the placement of \code{x}}
 
 \item{rightmost.closed}{see \link{findInterval}}
@@ -22,6 +22,6 @@ see \link{findInterval}
 }
 \description{
 When \code{vec} is in ascending order we use \code{base::findInterval()}, but
-when \code{vec} is in descending order we implement an adaptation of the 
+when \code{vec} is in descending order we implement an adaptation of the
 \code{locate()} function from Numerical Recipes for C \url{http://apps.nrbook.com/c/index.html}
 }
