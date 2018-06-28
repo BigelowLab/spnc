@@ -2,7 +2,7 @@
 #'
 #' @export
 #' @param   x   netcd4 or raster object
-#' @param   dir character either 'lon' or 'lat' (default)
+#' @param   dir character either 'lon' or 'lat' (default)  d
 #' @return      logical, TRUE if the specified cell locations ascend in value
 ascends <- function(x, dir = 'lat'){
     if (inherits(x, 'ncdf4')){
@@ -20,17 +20,23 @@ ascends <- function(x, dir = 'lat'){
 #'
 #' @export
 #' @param   x   netcd4 or raster object
+#' @param  flavor character vector from \code{spnc_flavor(x)}
 #' @return      2 element numeric of resolution in [x,y]
-get_res <- function(x){
+get_res <- function(x, flavor = spnc_flavor(x)){
     if (inherits(x, 'ncdf4')){
-        shape = get_shape(x)
-        aa = spnc::ncglobal_atts(x)
-        bb = unname(unlist(aa[c('westernmost_longitude', 'easternmost_longitude',
+        if (flavor$source == 'MURSST'){
+            r = c(0.01, 0.01)
+        } else {
+            shape = get_shape(x)
+            aa = spnc::ncglobal_atts(x)
+            bb = unname(unlist(aa[c('westernmost_longitude', 'easternmost_longitude',
                        'southernmost_latitude', 'northernmost_latitude') ]))
-        r = c((bb[2]-bb[1])/shape[1], (bb[4]-bb[3])/shape[2])
+            r = c((bb[2]-bb[1])/shape[1], (bb[4]-bb[3])/shape[2])
+        }
     } else {
         r = res(x)
     }
+    r
 }
 
 #' Get a 2 element vector of [nx, ny] dimensions
@@ -44,6 +50,7 @@ get_shape <- function(x){
     } else {
         r = dim(x)
     }
+    r
 }
 
 #' Get a vector of lon or lat cell locations
@@ -51,16 +58,25 @@ get_shape <- function(x){
 #' @export
 #' @param x     netcd4 or raster object
 #' @param what  character either 'lon' or 'lat' (default)
+#' @param  flavor character vector from \code{spnc_flavor(x)}
 #' @return      a vector of the cell locations
-get_loc <- function(x, what = 'lon'){
+get_loc <- function(x, what = 'lon', flavor = spnc_flavor(x)){
     if (inherits(x, 'ncdf4')){
-        #v   = x$dim[[what]]$vals
-        shape = get_shape(x)
-        aa = spnc::ncglobal_atts(x)
-        bb = unname(unlist(aa[c('westernmost_longitude', 'easternmost_longitude',
-                                'southernmost_latitude', 'northernmost_latitude') ]))
-        res = get_res(x)
-        v = switch(what[1],
+        if (flavor$source == 'MURSST'){
+            s = get_shape(x)
+            r = get_res(x)
+            if (what == 'lon'){
+                v  = seq(from = -180 + r[1]/2, by = r[1], length = s[1])
+            } else {
+                v  = seq(from = -90 + r[2]/2, by = r[2], length = s[2])
+            }
+        } else {
+            #
+            aa = spnc::ncglobal_atts(x)
+            bb = unname(unlist(aa[c('westernmost_longitude', 'easternmost_longitude',
+                          'southernmost_latitude', 'northernmost_latitude') ]))
+            res = get_res(x)
+            v = switch(what[1],
                 'lon'  = seq(from = bb[1] + 0.5 * res[1],
                              to = bb[2] - 0.5 * res[1],
                              by = res[1]),
@@ -72,7 +88,8 @@ get_loc <- function(x, what = 'lon'){
                             seq(from = bb[4] - 0.5 * res[2],
                                 to = bb[3] + 0.5 * res[2],
                                 by = -res[2])
-                        )
+                )
+        }
     } else {
         v  = switch(what[1],
                     'lon' = raster::xFromCol(x, 1:ncol(x)),
@@ -87,17 +104,26 @@ get_loc <- function(x, what = 'lon'){
 #' @export
 #' @param r     raster object
 #' @param bb    a 4 element vector describing the bounding box [left, right, bottom, top]
+#' @param flip  character either 'x', 'y' or 'xy' to flip the orientation
 #' @return      a 3 element vector of start [ix,iy], count, [nx, ny], and
 #'    an adjusted bb [left, right, bottom, top] and ext (extent) same as bb
-nav_from_bb <- function(r, bb){
+nav_from_bb <- function(r, bb, flip = ''){
 
     cr      = raster::crop(r, bb)
     cx      = get_loc(cr, 'lon')
     cy      = get_loc(cr, 'lat')
     rx      = get_loc(r, 'lon')
     ry      = get_loc(r, 'lat')
-    ix      = which.min(abs(rx - cx[1]))
-    iy      = which.min(abs(ry - cy[1]))
+    if (grepl('x', flip[1], fixed = TRUE)){
+        ix = which.min(abs(rev(rx) - cx[1]))
+    } else {
+        ix = which.min(abs(rx - cx[1]))
+    }
+    if (grepl('y', flip[1], fixed = TRUE)) {
+        iy = which.min(abs(rev(ry) - cy[length(cy)]))
+    } else {
+        iy = which.min(abs(ry - cy[1]))
+    }
 
     ext    = as.vector(extent(cr))
     list(
@@ -146,7 +172,7 @@ nc_crop <- function(x, varname = 'sst', bb = c(-180, 180, -90, 90),
     #       crs, ext, resolution, vals=NULL)
 
     nv = nav_from_bb(template, bb)
-    raster::raster(t(ncvar_get(NC, "sst", start = nv$start, count = nv$count)),
+    raster::raster(t(ncvar_get(NC, varname, start = nv$start, count = nv$count)),
         crs = raster::projection(template),
         xmn = nv$bb[1], xmx = nv$bb[2],
         ymn = nv$bb[3], ymx = nv$bb[4])

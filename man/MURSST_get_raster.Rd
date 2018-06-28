@@ -4,11 +4,11 @@
 \alias{MURSST_get_raster}
 \title{Get a raster}
 \usage{
-MURSST_get_raster(NC, what = "analysed_sst", layer = 1, bb = NC$BB,
-  crs = "+proj=longlat +datum=WGS84", flip = TRUE, time_fmt = "D\%Y\%j")
+MURSST_get_raster(X, what = "analysed_sst", layer = 1, bb = X$BB,
+  crs = get_projection("longlat"), flip = TRUE, time_fmt = "D\%Y\%j")
 }
 \arguments{
-\item{NC}{MURSSTRefClass object}
+\item{X}{MURSSTRefClass object}
 
 \item{what}{character one or more variable names}
 

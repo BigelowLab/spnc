@@ -2,15 +2,15 @@
 % Please edit documentation in R/MURSST.R
 \name{MURSSTClass_step}
 \alias{MURSSTClass_step}
-\title{Get the step size (resolution) as a guess - the space between the first 
-lon and lat values.  Subclasses with unambiguous steps sizes, like L3SMI and  
+\title{Get the step size (resolution) as a guess - the space between the first
+lon and lat values.  Subclasses with unambiguous steps sizes, like L3SMI and
 MURSST, should override this method.}
 \value{
 two element numeric vector of step size in x and y or NULL
 These may be signed for descending values of lon and or lat
 }
 \description{
-Get the step size (resolution) as a guess - the space between the first 
-lon and lat values.  Subclasses with unambiguous steps sizes, like L3SMI and  
+Get the step size (resolution) as a guess - the space between the first
+lon and lat values.  Subclasses with unambiguous steps sizes, like L3SMI and
 MURSST, should override this method.
 }

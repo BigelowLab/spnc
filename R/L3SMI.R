@@ -115,28 +115,11 @@ L3SMIRefClass$methods(
    get_extent = function(bb){
       s <- .self$step()
       if (missing(bb)){
-         #rx <- range(.self$lon('center'))
-         #ry <- range(.self$lat('center'))
-         #bb <- c(
-         #   rx[1] - s[1]/2,
-         #   rx[2] + s[1]/2,
-         #   ry[1] - s[2]/2,
-         #   ry[2] + s[2]/2)
          bb <- as.vector(raster::extent(.self$rastertemplate))
       }
       if (identical(bb, .self$BB)) return(raster::extent(bb))
       raster::extent(raster::crop(.self$rastertemplate, bb))
 
-      #llon <- .self$lon("center")
-      #llat <- .self$lat("center")
-      #ix <- find_interval(bb[1:2], llon)
-      #ix[ix < 1] <- 1
-      #iy <- find_interval(bb[3:4], llat)
-      #iy[iy < 1] <- 1
-#
-      #xx <- llon[ix] + c(-s[1], s[1])/2
-      #yy <- llat[iy] + c(-s[2], s[2])/2
-      #raster::extent(c(range(xx), range(yy)) )
    })
 
 
@@ -238,12 +221,7 @@ L3SMI_get_raster <- function(X, what = X$VARS[1], layer = 1, bb = X$BB,
     stopifnot(inherits(X, "L3SMIRefClass"))
     subnav <- X$subset_bbox(bb)
     template <- raster::crop(X$rastertemplate, bb)
-    #template <- raster::raster(
-    #    #nrow = subnav[['count']][2],
-    #    #ncol = subnav[['count']][1],
-    #    resolution = raster::res(X$raster::template()),
-    #    ext = raster::extent(subnav[['ext']]),
-    #    crs = crs)
+
 
     if (X$flavor[['local']] == TRUE){
 

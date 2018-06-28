@@ -9,7 +9,7 @@ MURSST_get_points(NC, x, y = NULL, what = NC$VARS[1], layer = 1)
 \arguments{
 \item{NC}{MURSSTRefClass object}
 
-\item{x}{numeric, vector of longitude points or, if y is NULL, a matrix [x,y] 
+\item{x}{numeric, vector of longitude points or, if y is NULL, a matrix [x,y]
 or a data.frame or list with x,y elements}
 
 \item{y}{numeric vector of lattitude points or NULL}

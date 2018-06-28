@@ -4,10 +4,10 @@
 \alias{NAMANLRefClass_get_extent}
 \title{Compute extent given a bounding box}
 \arguments{
-\item{bb}{the bounding box needed, if missing the current one is used, always 
+\item{bb}{the bounding box needed, if missing the current one is used, always
 assumed to be longlat}
 
-\item{proj}{character string either "lcc" or "longlat" (default) to specify the 
+\item{proj}{character string either "lcc" or "longlat" (default) to specify the
 projection of the returned}
 }
 \value{

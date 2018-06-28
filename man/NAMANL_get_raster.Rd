@@ -22,7 +22,7 @@ to [-180, 180, -90, 90]}
 
 \item{time_fmt}{if multiple time layers are returned, this controls the layer names}
 
-\item{layer}{numeric vector either a 1-based indices or POSIXct timestamps}
+\item{...}{further arguments to select the parameter by name}
 }
 \value{
 a \code{raster::brick} or \code{raster::layer} object or NULL

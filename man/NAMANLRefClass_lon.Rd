@@ -6,7 +6,7 @@
 \arguments{
 \item{what}{the desired location - 'leading', 'trailing', 'center' or 'native' (default)
 Values 'trailing' and 'leading' are about the direction lon/lat are stored.  For example,
-if lon/lat are each stored in ascending order then the leading edge is bottom and left. 
+if lon/lat are each stored in ascending order then the leading edge is bottom and left.
 On the other hand, is lon descends (east-to-west) then the leading edge is
 bottom and right.  Values 'native and 'center' are assumed the same - if that
 is not a correct for a class, then a method override is required}

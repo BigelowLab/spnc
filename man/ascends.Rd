@@ -9,7 +9,7 @@ ascends(x, dir = "lat")
 \arguments{
 \item{x}{netcd4 or raster object}
 
-\item{dir}{character either 'lon' or 'lat' (default)}
+\item{dir}{character either 'lon' or 'lat' (default)  d}
 }
 \value{
 logical, TRUE if the specified cell locations ascend in value

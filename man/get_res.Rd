@@ -4,10 +4,12 @@
 \alias{get_res}
 \title{Get a 2 element vector of [dx, dy] resolution}
 \usage{
-get_res(x)
+get_res(x, flavor = spnc_flavor(x))
 }
 \arguments{
 \item{x}{netcd4 or raster object}
+
+\item{flavor}{character vector from \code{spnc_flavor(x)}}
 }
 \value{
 2 element numeric of resolution in [x,y]

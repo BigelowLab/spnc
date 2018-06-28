@@ -4,12 +4,14 @@
 \alias{get_loc}
 \title{Get a vector of lon or lat cell locations}
 \usage{
-get_loc(x, what = "lon")
+get_loc(x, what = "lon", flavor = spnc_flavor(x))
 }
 \arguments{
 \item{x}{netcd4 or raster object}
 
 \item{what}{character either 'lon' or 'lat' (default)}
+
+\item{flavor}{character vector from \code{spnc_flavor(x)}}
 }
 \value{
 a vector of the cell locations

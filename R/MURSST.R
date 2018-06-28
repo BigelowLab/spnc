@@ -2,7 +2,7 @@
 
 
 #' Test if an NCDF contains MURSST data.
-#' 
+#'
 #' @export
 #' @param x ncdf4 object or SPNCRefClass
 #' @return logical
@@ -18,21 +18,38 @@ is_MURSST <- function(x){
    }
    natts <- names(atts) <- tolower(names(atts))
    if ('title' %in% natts)
-      ok <- mgrepl('MUR',atts[['title']], fixed = TRUE) 
-   ok  
+      ok <- mgrepl('MUR',atts[['title']], fixed = TRUE)
+   ok
 }
 
 
 #' A subclass of SPNCRefClass for Multi-scale Ultra-high Resolution Sea Surface Temperature \url{http://mur.jpl.nasa.gov/}
-#' 
+#'
 #' @include SPNC.R
 #' @export
 MURSSTRefClass <- setRefClass("MURSSTRefClass",
-    contains = "SPNCRefClass")
+    contains = "SPNCRefClass",
+    methods  = list(
+        init = function(...){
+            # this extent is from downloading an example via FTP and then reading
+            # with x = raster::raster(ncdf_file)
+            # then dput(as.vector(raster::extent(x)))
+            # this builds an empty raster identical to that read from file as far
+            # as extent and res goes.
+            e = c(-179.99500549324, 180.005000000076, -89.9949978636508, 89.9949978636508)
+            d = c(17999, 36000)
+            .self$rastertemplate = raster::raster(
+                ext = raster::extent(e),
+                ncol = d[2], nrow = d[1],
+                crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0")
+
+            }
+        )
+    )
 
 
-#' Get the step size (resolution) as a guess - the space between the first 
-#' lon and lat values.  Subclasses with unambiguous steps sizes, like L3SMI and  
+#' Get the step size (resolution) as a guess - the space between the first
+#' lon and lat values.  Subclasses with unambiguous steps sizes, like L3SMI and
 #' MURSST, should override this method.
 #'
 #' @name MURSSTClass_step
@@ -44,40 +61,48 @@ MURSSTRefClass$methods(
       c(0.01, 0.01)
    })
 
-  
+
+#' Craft subset indices into a ncdf array
+#'
+#' @name MURSSTRefClass_subset_bbox
+#'
+#' @seealso \url{https://stat.ethz.ch/pipermail/r-help/2011-March/272641.html}
+#' @param bb numeric, four element bounding box [left, right, bottom, top]
+#' @return a list of
+#' \itemize{
+#'  \item{start indices in x and y}
+#'  \item{counts in x and y}
+#'  \item{bb vector of [left, right, bottom, top] pixel centers}
+#'  \item{ext extent vector [left, right, bottom, top] pixel outer edges}
+#'  }
+NULL
+MURSSTRefClass$methods(
+   subset_bbox = function(bb = NULL){
+      if (is.null(bb)) bb <- .self$get_extent()
+      nav_from_bb(.self$rastertemplate, bb, flip = 'y')
+   }) # subset_bbox
+
+
+
+
 #' Compute extent given a bounding box
-#' 
+#'
 #' @name MURSSTRefClass_get_extent
 #' @param bb the bounding box needed, if missing the current one is used
 #' @return a raster::Extent object
 NULL
 MURSSTRefClass$methods(
    get_extent = function(bb){
+      s <- .self$step()
       if (missing(bb)){
-         x <- range(.self$NC$dim$lon$vals)
-         y <- range(.self$NC$dim$lat$vals)
-         s <- .self$step()
-         #bb <- c(range(.self$lon()[c(1,nx)]), range(.self$lat()[c(1,ny)]))
-         bb <- c( x + c(-s[1], s[1]), y + c(-s[2], s[2]))
-         return(raster::extent(bb))
+         bb <- as.vector(raster::extent(.self$rastertemplate))
       }
       if (identical(bb, .self$BB)) return(raster::extent(.self$BB))
-      
-      llon <- .self$lon("leading")
-      llat <- .self$lat("leading")
-      ix <- find_interval(bb[1:2], llon)
-      ix[ix < 1] <- 1
-      iy <- find_interval(bb[3:4], llat)
-      iy[ix < 1] <- 1
-      
-      s <- .self$STEP
-      xx <- llon[ix] + if (s[1] < 0) c(s[1],0) else c(0, s[1])
-      yy <- llat[iy] + if (s[2] < 0) c(s[2],0) else c(0, s[2])       
-      raster::extent(c(range(xx), range(yy)) )
-   })   
+      raster::extent(raster::crop(.self$rastertemplate, bb))
+   })
 
 #' Compute indicies (start and count) for individual [lon,lat] points
-#' 
+#'
 #' @name MURSSTRefClass_subset_points
 #' @param x either a vector of longitude or a 2d matrix [lon,lat] or a data.frame
 #'    with lon,lat columns
@@ -87,7 +112,7 @@ MURSSTRefClass$methods(
 NULL
 MURSSTRefClass$methods(
    subset_points = function(x, y = NULL, layer = 1){
-   
+
       # first verify x and y
       if (is.null(y)){
          # this covers list(x=..., y=...) or data.frame(x=...,y=...)
@@ -109,18 +134,18 @@ MURSSTRefClass$methods(
             stop("if y is NULL, then x must be list, data.frame or matrix with x and y elements")
          }
       } # is y provided or NULL
-   
+
       stopifnot(length(x) == length(y))
-      
+
       # first we get extent, leading cell edges and indices
       e <- .self$get_extent()
       llon <- .self$lon("leading")
-      llat <- .self$lat("leading")   
+      llat <- .self$lat("leading")
       ix <- spnc::find_interval(x, llon)
       iy <- spnc::find_interval(y, llat)
       # now convert to list of (start = [ix,iy], count = [nx,ny])
       # because we have points count is always 1
-      iz <- mapply(function(x, y, layer = 1){         
+      iz <- mapply(function(x, y, layer = 1){
             list(start = c(x, y, layer), count = c(1,1,1))
          },
          ix,iy, layer = layer, SIMPLIFY = FALSE)
@@ -133,10 +158,10 @@ MURSSTRefClass$methods(
       iz[ixna | iyna] <- NA
       return(iz)
    }) #subset_points
-   
-   
+
+
 #' Get a raster
-#' 
+#'
 #' @name MURSSTRefClass_get_raster
 #' @param what character one or more variable names
 #' @param bb a 4 element bounding box vector [left, right, bottom, top], defaults
@@ -151,7 +176,7 @@ MURSSTRefClass$methods(
 NULL
 MURSSTRefClass$methods(
    get_raster = function(what = 'analysed_sst', layer = 1, bb = .self$BB,
-      crs = "+proj=longlat +datum=WGS84", 
+      crs = "+proj=longlat +datum=WGS84",
       flip = TRUE, time_fmt = "D%Y%j"){
       R <- MURSST_get_raster(.self, what = what, layer = layer, bb = bb,
          crs = crs, flip = flip, time_fmt = time_fmt)
@@ -160,31 +185,31 @@ MURSSTRefClass$methods(
 
 
 #' Get points
-#' 
+#'
 #' @name MURSSTRefClass_get_points
-#' @param x numeric, vector of longitude points or, if y is NULL, a matrix [x,y] 
+#' @param x numeric, vector of longitude points or, if y is NULL, a matrix [x,y]
 #'     or a data.frame or list with x,y elements
-#' @param y numeric vector of lattitude points or NULL  
+#' @param y numeric vector of lattitude points or NULL
 #' @param what character one or more variable names or variable indices
 #' @param layer numeric layer index
 #' @return numeric vector of values
 NULL
 MURSSTRefClass$methods(
    get_points = function(x, y = NULL, what = .self$VARS[1], layer = 1){
-      
+
       if (!all(what %in% .self$VARS))
          stop("one or more requested variable(s) not in data:", paste(what, collapse = "\n"))
       MURSST_get_points(.self, x=x, y=y, what=what, layer = layer)
-   }) # L3SMI_get_points
-   
+   }) # MURSST_get_points
+
 
 ##### Methods above
 ##### functions below
 
 #' Get a raster
-#' 
+#'
 #' @export
-#' @param NC MURSSTRefClass object
+#' @param X MURSSTRefClass object
 #' @param what character one or more variable names
 #' @param bb a 4 element bounding box vector [left, right, bottom, top], defaults
 #'    to [-180, 180, -90, 90]
@@ -195,49 +220,50 @@ MURSSTRefClass$methods(
 #' @param flip logical if TRUE then flip the raster in the y direction
 #' @param time_fmt if multiple time layers are returned, this controls the layer names
 #' @return a \code{raster::brick} or \code{raster::layer} object or NULL
-MURSST_get_raster <- function(NC, what = 'analysed_sst', layer = 1, bb = NC$BB,
-      crs = "+proj=longlat +datum=WGS84", 
+MURSST_get_raster <- function(X, what = 'analysed_sst', layer = 1, bb = X$BB,
+      crs = get_projection("longlat"), #"+proj=longlat +datum=WGS84",
       flip = TRUE, time_fmt = "D%Y%j"){
-  
-      stopifnot(inherits(NC, "MURSSTRefClass"))
-      subnav <- NC$subset_bbox(bb)
-      ext <- NC$get_extent(bb = subnav[['bb']])
-      
-      if (inherits(layer, "POSIXct") && (length(NC$TIME) > 1) ){
-         layer <- findInterval(layer, NC$TIME, all.inside = TRUE)
+
+      stopifnot(inherits(X, "MURSSTRefClass"))
+      subnav <- X$subset_bbox(bb)
+      R <- raster::crop(X$rastertemplate, bb)
+      ext <- X$get_extent(bb = subnav[['bb']])
+
+      if (inherits(layer, "POSIXct") && (length(X$TIME) > 1) ){
+         layer <- findInterval(layer, X$TIME, all.inside = TRUE)
       }
-      
-      getOneVar <- function(vname, NC, subnav, layer = 1,
+
+      getOneVar <- function(vname, X, subnav, layer = 1,
          crs = "+proj=longlat +datum=WGS84"){
-         ncdf4::ncvar_get(NC, vname, 
-            start = c(subnav[['start']], layer[1]), 
+         ncdf4::ncvar_get(X, vname,
+            start = c(subnav[['start']], layer[1]),
             count = c(subnav[['count']], 1) )
       }
-      getOneLayer <- function(layer, NC, subnav, what = names(NC[['var']])[[1]],
+      getOneLayer <- function(layer, X, subnav, what = names(X[['var']])[[1]],
          crs = "+proj=longlat +datum=WGS84"){
-         ncdf4::ncvar_get(NC, varid = what, 
-            start = c(subnav[['start']], layer[1]), 
+         ncdf4::ncvar_get(X, varid = what,
+            start = c(subnav[['start']], layer[1]),
             count = c(subnav[['count']], 1) )
       }
-      
-      
-      R <- raster::raster(nrow = subnav[['count']][2], 
-         ncol = subnav[['count']][1], ext = ext, crs = crs)
-        
-      if (length(what) > 1){   
-         X <- lapply(what, getOneVar, NC$NC, subnav, crs = crs, layer = layer[1] )
-         for (w in names(X)) R <-  raster::addLayer(R, 
-             raster::raster(t(X[[w]]), template = R))
+
+
+      #R <- raster::raster(nrow = subnav[['count']][2],
+      #  ncol = subnav[['count']][1], ext = ext, crs = crs)
+
+      if (length(what) > 1){
+         xx <- lapply(what, getOneVar, X$NC, subnav, crs = crs, layer = layer[1] )
+         for (w in names(X)) R <-  raster::addLayer(R,
+             raster::raster(t(xx[[w]]), template = R))
          names(R) <- what
       } else {
-         X <- lapply(layer, getOneLayer, NC$NC, subnav, crs = crs, what = what[1]) 
-         for (r in X) R <-  raster::addLayer(R, 
+         xx <- lapply(layer, getOneLayer, X$NC, subnav, crs = crs, what = what[1])
+         for (r in xx) R <-  raster::addLayer(R,
              raster::raster(t(r), template = R))
-         if (length(NC$TIME) > 1){
-            names(R) <- format(NC$TIME[layer], time_fmt)
+         if (length(X$TIME) > 1){
+            names(R) <- format(X$TIME[layer], time_fmt)
          } else {
             names(R) <- paste("layer", layer, sep = "_")
-         } 
+         }
       }
       if (flip) R <-  raster::flip(R,"y")
       return(R)
@@ -245,32 +271,32 @@ MURSST_get_raster <- function(NC, what = 'analysed_sst', layer = 1, bb = NC$BB,
 
 
 #' Get points for MURSSTRefClass
-#' 
+#'
 #' @export
 #' @param NC MURSSTRefClass object
-#' @param x numeric, vector of longitude points or, if y is NULL, a matrix [x,y] 
+#' @param x numeric, vector of longitude points or, if y is NULL, a matrix [x,y]
 #'     or a data.frame or list with x,y elements
 #' @param y numeric vector of lattitude points or NULL
 #' @param what character one or more variable names or variable indices
 #' @param layer the layer index
 #' @return numeric vector of values
 MURSST_get_points <- function(NC, x, y = NULL, what = NC$VARS[1], layer = 1){
-   
+
    stopifnot(inherits(NC, "MURSSTRefClass"))
-   
+
    p <- NC$subset_points(x,y=y, layer = layer)
-      
-      
-   sapply(p, 
+
+
+   sapply(p,
          function(x, nc = NULL, what = 1){
             if (!is.list(x) && is.na(x)){
                r <- NA
             } else {
-               r <- ncdf4::ncvar_get(nc, what, 
-                  start = x[['start']], 
+               r <- ncdf4::ncvar_get(nc, what,
+                  start = x[['start']],
                   count = x[['count']] )
             }
-            r   
+            r
          },
          nc = NC$NC, what = what[1])
 }

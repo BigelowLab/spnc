@@ -5,12 +5,14 @@
 \title{Generate the navigation elements required to subset an ncdf4 object.
 Returns a list of start indices and count and an adjusted bounding box}
 \usage{
-nav_from_bb(r, bb)
+nav_from_bb(r, bb, flip = "")
 }
 \arguments{
 \item{r}{raster object}
 
 \item{bb}{a 4 element vector describing the bounding box [left, right, bottom, top]}
+
+\item{flip}{character either 'x', 'y' or 'xy' to flip the orientation}
 }
 \value{
 a 3 element vector of start [ix,iy], count, [nx, ny], and

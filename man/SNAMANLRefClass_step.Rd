@@ -2,11 +2,11 @@
 % Please edit documentation in R/NAMANL.R
 \name{SNAMANLRefClass_step}
 \alias{SNAMANLRefClass_step}
-\title{Get the step size (resolution) as a guess - the space between the first 
-lon and lat values.  Subclasses with unambiguous steps sizes, like L3SMI and  
+\title{Get the step size (resolution) as a guess - the space between the first
+lon and lat values.  Subclasses with unambiguous steps sizes, like L3SMI and
 MURSST, should override this method.}
 \arguments{
-\item{proj}{character string either "lcc" or "longlat" (default) to specify the 
+\item{proj}{character string either "lcc" or "longlat" (default) to specify the
 projection of the returned}
 }
 \value{
@@ -14,7 +14,7 @@ two element numeric vector of step size in x and y or NULL
 These may be signed for descending values of lon and or lat
 }
 \description{
-Get the step size (resolution) as a guess - the space between the first 
-lon and lat values.  Subclasses with unambiguous steps sizes, like L3SMI and  
+Get the step size (resolution) as a guess - the space between the first
+lon and lat values.  Subclasses with unambiguous steps sizes, like L3SMI and
 MURSST, should override this method.
 }
