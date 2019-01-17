@@ -47,7 +47,7 @@ spnc_flavor <- function(x){
    }
 
    # assign the local flag
-   if (!is.null(filename)) flvr[['local']] <- !utils::grepl("^http", filename[1])
+   if (!is.null(filename)) flvr[['local']] <- !base::grepl("^http", filename[1])
 
    natts <- names(atts) <- tolower(names(atts))
 
@@ -88,7 +88,7 @@ spnc_flavor <- function(x){
 #'    is found in \code{x}
 mgrepl <- function(pattern, x, ...){
    ix <- do.call(rbind, lapply(pattern,
-      function(p, x = "", ...){ utils::grepl(p, x, ...) },
+      function(p, x = "", ...){ base::grepl(p, x, ...) },
       x = x, ...))
    ok <- apply(ix, 2, any)
 }
