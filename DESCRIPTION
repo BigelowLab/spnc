@@ -14,6 +14,7 @@ Imports:
 Maintainer: Ben Tupper <btupper@bigelow.org>
 Author: Ben Tupper <btupper@bigelow.org>
 License: MIT + file LICENSE
+Encoding: UTF-8
 Collate:
     'SPNC.R'
     'BlendedSeaWindRefClass.R'
@@ -27,4 +28,4 @@ Collate:
     'SPNC-package.R'
     'misc.R'
     'nc.R'
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.1

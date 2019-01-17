@@ -5,8 +5,8 @@
 \title{Get a raster for NAMANLRefClass}
 \usage{
 NAMANL_get_raster(NC, what = NC$VARS[1], bb = NC$BB,
-  crs = "+proj=longlat +datum=WGS84", flip = FALSE, time_fmt = "D\%Y\%j",
-  ...)
+  crs = "+proj=longlat +datum=WGS84", flip = FALSE,
+  time_fmt = "D\%Y\%j", ...)
 }
 \arguments{
 \item{NC}{NAMANLRefClass object}

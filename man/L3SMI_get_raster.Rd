@@ -5,7 +5,8 @@
 \title{Get a raster for L3SMIRefClass}
 \usage{
 L3SMI_get_raster(X, what = X$VARS[1], layer = 1, bb = X$BB,
-  crs = get_projection("longlat"), flip = FALSE, time_fmt = "D\%Y\%j")
+  crs = get_projection("longlat"), flip = FALSE,
+  time_fmt = "D\%Y\%j")
 }
 \arguments{
 \item{X}{L3SMIRefClass object}

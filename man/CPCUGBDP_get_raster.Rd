@@ -5,7 +5,8 @@
 \title{Get a raster}
 \usage{
 CPCUGBDP_get_raster(X, what = "precip", time = 1, bb = X$BB,
-  crs = "+proj=longlat +datum=WGS84", flip = TRUE, time_fmt = "D\%Y\%j")
+  crs = "+proj=longlat +datum=WGS84", flip = TRUE,
+  time_fmt = "D\%Y\%j")
 }
 \arguments{
 \item{X}{CPCUGBDPRefClass object}

@@ -2,7 +2,6 @@
 % Please edit documentation in R/NARR.R
 \name{NARRRefClass_lon}
 \alias{NARRRefClass_lon}
-\alias{NARRRefClass_lon}
 \title{Get the longitude values of the grid.  Note the grid is projected, so}
 \arguments{
 \item{what}{the desired location - 'center' or 'native' (default) which are the same.}

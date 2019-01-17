@@ -5,7 +5,8 @@
 \title{Get a raster for BlendedSeaWindsRefClass}
 \usage{
 BSW_get_raster(X, what = X$VARS[1], layer = 1, bb = X$BB,
-  crs = "+proj=longlat +datum=WGS84", flip = TRUE, time_fmt = "D\%Y\%j")
+  crs = "+proj=longlat +datum=WGS84", flip = TRUE,
+  time_fmt = "D\%Y\%j")
 }
 \arguments{
 \item{X}{BlendedSeaWindsRefClass object}
